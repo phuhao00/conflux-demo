@@ -52,7 +52,7 @@ EXCHANGE_RATE_CFX_CNY=5.5
 PORT=3001
 
 # 数据库配置
-MYSQL_DSN=root:root@tcp(localhost:3306)/creaibo?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+MYSQL_DSN=root:root@tcp(localhost:3306)/conflux?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
 REDIS_URL=redis://localhost:6379
 
 # 管理员账号
