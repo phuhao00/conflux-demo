@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin</title>
+</head>
+<body>
+  <h1>Admin</h1>
+  <div>
+    <h2>Limits</h2>
+    <input id="maxTx" placeholder="MAX_TX_PER_DAY" />
+    <input id="maxPerTx" placeholder="MAX_RMB_PER_TX" />
+    <input id="maxPerDay" placeholder="MAX_RMB_PER_DAY" />
+    <input id="alert" placeholder="ALERT_RMB_THRESHOLD" />
+    <button onclick="saveLimits()">Save</button>
+  </div>
+  <div>
+    <h2>Logs</h2>
+    <button onclick="fetchAudit()">Audit</button>
+    <button onclick="fetchAlerts()">Alerts</button>
+    <pre id="logs"></pre>
+  </div>
+  <div>
+    <h2>Notify</h2>
+    <button onclick="notifyTest()">Send Test</button>
+  </div>
+  <script>
+    async function saveLimits() {
+      const body = {
+        maxTxPerDay: Number(document.getElementById('maxTx').value || 0),
+        maxRmbPerTx: Number(document.getElementById('maxPerTx').value || 0),
+        maxRmbPerDay: Number(document.getElementById('maxPerDay').value || 0),
+        alertRmbThreshold: Number(document.getElementById('alert').value || 0)
+      }
+      await fetch('/admin/set-limits', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) })
+    }
+    async function fetchAudit() {
+      const r = await fetch('/admin/audit')
+      document.getElementById('logs').textContent = await r.text()
+    }
+    async function fetchAlerts() {
+      const r = await fetch('/admin/alerts')
+      document.getElementById('logs').textContent = await r.text()
+    }
+    async function notifyTest() {
+      await fetch('/admin/notify-test', { method: 'POST' })
+    }
+  </script>
+</body>
+</html>

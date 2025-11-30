@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conflux Farm - 农产品链上资产管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            min-width: 350px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.success {
+            border-left: 5px solid #28a745;
+        }
+
+        .toast.error {
+            border-left: 5px solid #dc3545;
+        }
+
+        .toast-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .toast-header.success {
+            color: #28a745;
+        }
+
+        .toast-header.error {
+            color: #dc3545;
+        }
+
+        .toast-body {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .result pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .success {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .error {
+            color: #dc3545;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast">
+        <button class="toast-close" onclick="hideToast()">×</button>
+        <div class="toast-header" id="toastHeader"></div>
+        <div class="toast-body" id="toastBody"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🌾 Conflux Farm</h1>
+            <p>农产品链上资产与人民币Gas代付示例</p>
+        </div>
+
+        <div class="content">
+            <!-- 充值人民币 -->
+            <div class="section">
+                <h2>💰 充值人民币</h2>
+                <div class="form-group">
+                    <label>地址</label>
+                    <input type="text" id="topupAddress" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
+                </div>
+                <div class="form-group">
+                    <label>金额 (RMB)</label>
+                    <input type="number" id="topupAmount" placeholder="100">
+                </div>
+                <button class="btn" onclick="topup()">充值</button>
+            </div>
+
+            <!-- 查询余额 -->
+            <div class="section">
+                <h2>💳 查询余额</h2>
+                <div class="form-group">
+                    <label>地址</label>
+                    <input type="text" id="balanceAddress" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
+                </div>
+                <button class="btn" onclick="getBalance()">查询余额</button>
+            </div>
+
+            <!-- 铸造批次 NFT -->
+            <div class="section">
+                <h2>🎨 铸造批次 NFT</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>扣费地址</label>
+                        <input type="text" id="mintFrom" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
+                    </div>
+                    <div class="form-group">
+                        <label>接收地址</label>
+                        <input type="text" id="mintTo" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
+                    </div>
+                    <div class="form-group">
+                        <label>NFT 合约地址</label>
+                        <input type="text" id="nftAddress" value="0x5D96E3BDC05Bc48D6bae1A38B0f6Bdf86C47e13d">
+                    </div>
+                    <div class="form-group">
+                        <label>Token ID</label>
+                        <input type="number" id="tokenId" placeholder="1">
+                    </div>
+                    <div class="form-group">
+                        <label>产地</label>
+                        <input type="text" id="origin" placeholder="云南普洱">
+                    </div>
+                    <div class="form-group">
+                        <label>采收时间 (Unix秒)</label>
+                        <input type="number" id="harvestTime">
+                    </div>
+                    <div class="form-group">
+                        <label>质检编号</label>
+                        <input type="text" id="inspectionId" placeholder="QC20240101">
+                    </div>
+                    <div class="form-group">
+                        <label>URI (可选)</label>
+                        <input type="text" id="uri" placeholder="留空则自动生成">
+                    </div>
+                </div>
+                <button class="btn" onclick="mintNFT()">铸造 NFT</button>
+            </div>
+
+            <!-- 转移批次 NFT -->
+            <div class="section">
+                <h2>🔄 转移批次 NFT</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>扣费地址 (From)</label>
+                        <input type="text" id="transferFrom" placeholder="0x...">
+                    </div>
+                    <div class="form-group">
+                        <label>接收地址 (To)</label>
+                        <input type="text" id="transferTo" placeholder="0x...">
+                    </div>
+                    <div class="form-group">
+                        <label>NFT 合约地址</label>
+                        <input type="text" id="transferNftAddress" placeholder="0x...">
+                    </div>
+                    <div class="form-group">
+                        <label>Token ID</label>
+                        <input type="number" id="transferTokenId" placeholder="1">
+                    </div>
+                </div>
+                <button class="btn" onclick="transferNFT()">转移 NFT</button>
+            </div>
+
+            <!-- 查询批次详情 -->
+            <div class="section">
+                <h2>🔍 查询批次详情</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>NFT 合约地址</label>
+                        <input type="text" id="detailsNftAddress" placeholder="0x...">
+                    </div>
+                    <div class="form-group">
+                        <label>Token ID</label>
+                        <input type="number" id="detailsTokenId" placeholder="1">
+                    </div>
+                </div>
+                <button class="btn" onclick="getBatchDetails()">查询详情</button>
+            </div>
+
+            <!-- 结果显示 -->
+            <div class="section">
+                <h2>📋 操作结果</h2>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px;">处理中...</p>
+                </div>
+                <div class="result" id="result">
+                    <p style="color: #999;">结果将显示在这里...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let toastTimeout;
+
+        function showToast(title, message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const header = document.getElementById('toastHeader');
+            const body = document.getElementById('toastBody');
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+
+            header.textContent = title;
+            header.className = `toast-header ${isSuccess ? 'success' : 'error'}`;
+            body.textContent = message;
+            toast.className = `toast ${isSuccess ? 'success' : 'error'} show`;
+
+            toastTimeout = setTimeout(() => {
+                hideToast();
+            }, 3000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('hiding');
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 300);
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+        }
+
+        function showResult(data, isError = false) {
+            hideLoading();
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <h3 class="${isError ? 'error' : 'success'}">${isError ? '❌ 错误' : '✅ 成功'}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            showLoading();
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+                const response = await fetch(API_BASE + endpoint, options);
+                const data = await response.json();
+
+                showResult(data, !response.ok);
+
+                if (!response.ok) {
+                    const errorMsg = data.details ? `${data.error}: ${data.details}` : (data.error || '请求失败');
+                    showToast('❌ 操作失败', errorMsg, false);
+                }
+
+                return { ok: response.ok, data };
+            } catch (error) {
+                showResult({ error: error.message }, true);
+                showToast('❌ 网络错误', error.message, false);
+                return { ok: false, data: null };
+            }
+        }
+
+        async function topup() {
+            const address = document.getElementById('topupAddress').value.trim();
+            const rmbStr = document.getElementById('topupAmount').value.trim();
+
+            if (!address || !rmbStr) {
+                showToast('❌ 输入错误', '请填写完整信息', false);
+                return;
+            }
+
+            const rmb = parseFloat(rmbStr);
+            const result = await apiCall('/topup', 'POST', { address, rmb });
+            if (result.ok && result.data) {
+                showToast('✅ 充值成功', `成功充值 ${rmb} RMB,当前余额: ${result.data.balance} RMB`, true);
+            }
+        }
+
+        async function getBalance() {
+            const address = document.getElementById('balanceAddress').value.trim();
+            if (!address) {
+                showToast('❌ 输入错误', '请填写地址', false);
+                return;
+            }
+            const result = await apiCall(`/balance/${address}`);
+            if (result.ok && result.data) {
+                showToast('✅ 查询成功', `账户余额: ${result.data.balance} RMB`, true);
+            }
+        }
+
+        async function mintNFT() {
+            const from = document.getElementById('mintFrom').value.trim();
+            const to = document.getElementById('mintTo').value.trim();
+            const nftAddress = document.getElementById('nftAddress').value.trim();
+            const tokenIdStr = document.getElementById('tokenId').value.trim();
+            const origin = document.getElementById('origin').value.trim();
+            const harvestTimeStr = document.getElementById('harvestTime').value.trim();
+            const inspectionId = document.getElementById('inspectionId').value.trim();
+            const uri = document.getElementById('uri').value.trim();
+
+            if (!from) { showToast('❌ 输入错误', '请填写扣费地址', false); return; }
+            if (!to) { showToast('❌ 输入错误', '请填写接收地址', false); return; }
+            if (!nftAddress) { showToast('❌ 输入错误', '请填写 NFT 合约地址', false); return; }
+            if (tokenIdStr === '') { showToast('❌ 输入错误', '请填写 Token ID', false); return; }
+            if (!origin) { showToast('❌ 输入错误', '请填写产地', false); return; }
+            if (!harvestTimeStr) { showToast('❌ 输入错误', '请填写采收时间', false); return; }
+            if (!inspectionId) { showToast('❌ 输入错误', '请填写质检编号', false); return; }
+
+            const tokenId = parseInt(tokenIdStr);
+            const harvestTime = parseInt(harvestTimeStr);
+
+            const result = await apiCall('/relay/nft/mint', 'POST', {
+                from, to, nftAddress, tokenId, origin, harvestTime, inspectionId, uri
+            });
+            if (result.ok) {
+                showToast('✅ 铸造成功', `NFT #${tokenId} 铸造成功!`, true);
+            }
+        }
+
+        async function transferNFT() {
+            const from = document.getElementById('transferFrom').value.trim();
+            const to = document.getElementById('transferTo').value.trim();
+            const nftAddress = document.getElementById('transferNftAddress').value.trim();
+            const tokenIdStr = document.getElementById('transferTokenId').value.trim();
+
+            if (!from || !to || !nftAddress || !tokenIdStr) {
+                showToast('❌ 输入错误', '请填写完整信息', false);
+                return;
+            }
+
+            const tokenId = parseInt(tokenIdStr);
+            const result = await apiCall('/relay/nft/transfer', 'POST', {
+                from, to, nftAddress, tokenId
+            });
+            if (result.ok) {
+                showToast('✅ 转移成功', `NFT #${tokenId} 转移成功!`, true);
+            }
+        }
+
+        async function getBatchDetails() {
+            const nftAddress = document.getElementById('detailsNftAddress').value.trim();
+            const tokenIdStr = document.getElementById('detailsTokenId').value.trim();
+
+            if (!nftAddress || !tokenIdStr) {
+                showToast('❌ 输入错误', '请填写完整信息', false);
+                return;
+            }
+
+            const tokenId = parseInt(tokenIdStr);
+            const result = await apiCall(`/nft/batch/${nftAddress}/${tokenId}/details`);
+            if (result.ok) {
+                showToast('✅ 查询成功', `成功获取 NFT #${tokenId} 的详细信息`, true);
+            }
+        }
+
+        // 设置默认采收时间为当前时间
+        document.getElementById('harvestTime').value = Math.floor(Date.now() / 1000);
+
+        async function loadDefaultAddress() {
+            try {
+                const r = await fetch(API_BASE + '/nft/default-address');
+                const j = await r.json();
+                if (j.ok && j.address) {
+                    const ids = ['nftAddress', 'transferNftAddress', 'detailsNftAddress'];
+                    ids.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && (!el.value || el.value.startsWith('0x5D96'))) {
+                            el.value = j.address;
+                        }
+                    });
+                }
+            } catch (e) { }
+        }
+
+        loadDefaultAddress();
+    </script>
+</body>
+
+</html>
