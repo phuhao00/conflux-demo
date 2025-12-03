@@ -1,0 +1,52 @@
+{
+  "common": {
+    "home": "首页",
+    "market": "行情",
+    "community": "社区",
+    "product": "商品",
+    "profile": "我的"
+  },
+  "home": {
+    "title": "AgriFinance",
+    "latestUpdates": "最新动态",
+    "policy": "政策",
+    "news": "新闻"
+  },
+  "market": {
+    "title": "市场行情",
+    "product": "产品",
+    "price": "价格",
+    "change": "涨跌幅"
+  },
+  "community": {
+    "title": "社区",
+    "ago": "前"
+  },
+  "product": {
+    "title": "RWA产品",
+    "expectedYield": "预期收益",
+    "duration": "期限",
+    "minInvest": "最低投资",
+    "investNow": "立即投资",
+    "low": "低",
+    "medium": "中",
+    "high": "高"
+  },
+  "profile": {
+    "title": "我的",
+    "totalBalance": "总余额 (USD)",
+    "recharge": "充值",
+    "transfer": "转账",
+    "bankCards": "银行卡",
+    "securityCenter": "安全中心",
+    "helpSupport": "帮助与支持",
+    "recentTransactions": "最近交易",
+    "deposit": "充值",
+    "investment": "投资",
+    "yieldPayout": "收益分红",
+    "withdrawal": "提现",
+    "success": "成功",
+    "language": "语言",
+    "switchLanguage": "切换语言"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "common": {
+    "home": "Home",
+    "market": "Market",
+    "community": "Community",
+    "product": "Product",
+    "profile": "Me"
+  },
+  "home": {
+    "title": "AgriFinance",
+    "latestUpdates": "Latest Updates",
+    "policy": "Policy",
+    "news": "News"
+  },
+  "market": {
+    "title": "Market Prices",
+    "product": "Product",
+    "price": "Price",
+    "change": "Change"
+  },
+  "community": {
+    "title": "Community",
+    "ago": "ago"
+  },
+  "product": {
+    "title": "RWA Products",
+    "expectedYield": "Exp. Yield",
+    "duration": "Duration",
+    "minInvest": "Min. Invest",
+    "investNow": "Invest Now",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "profile": {
+    "title": "Me",
+    "totalBalance": "Total Balance (USD)",
+    "recharge": "Recharge",
+    "transfer": "Transfer",
+    "bankCards": "Bank Cards",
+    "securityCenter": "Security Center",
+    "helpSupport": "Help & Support",
+    "recentTransactions": "Recent Transactions",
+    "deposit": "Deposit",
+    "investment": "Investment",
+    "yieldPayout": "Yield Payout",
+    "withdrawal": "Withdrawal",
+    "success": "Success",
+    "language": "Language",
+    "switchLanguage": "Switch Language"
+  }
+}
