@@ -1,10 +1,10 @@
 package blockchain
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"math/big"
+	"time"
 
 	"conflux-demo/backend/config"
 
@@ -28,11 +28,11 @@ func Initialize(cfg *config.Config) error {
 		return fmt.Errorf("failed to create Conflux client: %w", err)
 	}
 
-	accountMgr := sdk.NewAccountManager(client)
+	accountMgr := sdk.NewAccountManager("./keystore", cfg.ConfluxNetworkID)
 
 	confluxClient = &Client{
 		SDK:        client,
-		AccountMgr: &accountMgr,
+		AccountMgr: accountMgr,
 		Config:     cfg,
 	}
 
@@ -52,7 +52,7 @@ func (c *Client) GetBalance(address string) (*big.Int, error) {
 		return nil, fmt.Errorf("invalid address: %w", err)
 	}
 
-	balance, err := c.SDK.GetBalance(*addr)
+	balance, err := c.SDK.GetBalance(addr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get balance: %w", err)
 	}
@@ -81,10 +81,10 @@ func (c *Client) SendTransaction(to string, value *big.Int, data []byte) (string
 	utx := types.UnsignedTransaction{
 		UnsignedTransactionBase: types.UnsignedTransactionBase{
 			From:  &account,
-			To:    toAddr,
-			Value: types.NewBigInt(value),
-			Data:  data,
+			Value: types.NewBigIntByRaw(value),
 		},
+		To:   &toAddr,
+		Data: data,
 	}
 
 	// Send transaction
@@ -110,7 +110,7 @@ func (c *Client) GetTransactionReceipt(txHash string) (*types.TransactionReceipt
 // WaitForReceipt waits for a transaction to be mined
 func (c *Client) WaitForReceipt(txHash string) (*types.TransactionReceipt, error) {
 	hash := types.Hash(txHash)
-	receipt, err := c.SDK.WaitForTransationReceipt(hash, context.Background())
+	receipt, err := c.SDK.WaitForTransationReceipt(hash, 60*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("failed to wait for receipt: %w", err)
 	}

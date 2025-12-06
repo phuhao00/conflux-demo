@@ -1,29 +1,41 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-
-const MOCK_MARKET_DATA = [
-  { id: '1', name: 'Wheat (Soft Red)', price: '235.50', change: '+2.45', changePercent: '+1.05%', icon: 'barley' },
-  { id: '2', name: 'Corn (Yellow)', price: '188.20', change: '-1.10', changePercent: '-0.58%', icon: 'corn' },
-  { id: '3', name: 'Soybeans', price: '450.00', change: '+5.75', changePercent: '+1.29%', icon: 'soy-sauce' },
-  { id: '4', name: 'Rice (Rough)', price: '16.40', change: '+0.05', changePercent: '+0.31%', icon: 'rice' },
-  { id: '5', name: 'Cotton', price: '82.15', change: '-0.45', changePercent: '-0.54%', icon: 'flower' },
-  { id: '6', name: 'Coffee (Arabica)', price: '195.30', change: '+3.20', changePercent: '+1.67%', icon: 'coffee' },
-  { id: '7', name: 'Sugar (Raw)', price: '22.40', change: '-0.15', changePercent: '-0.67%', icon: 'cube-outline' },
-];
+import { apiClient } from '../api/client';
 
 const MarketScreen = () => {
   const { t } = useTranslation();
+  const [marketData, setMarketData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const res = await apiClient.get('/api/market');
+      if (res.ok && res.data) {
+        setMarketData(res.data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getIcon = (iconName) => {
     const iconProps = { size: 32, color: '#666' };
-    return <MaterialCommunityIcons name={iconName} {...iconProps} />;
+    return <MaterialCommunityIcons name={iconName || 'help-circle'} {...iconProps} />;
   };
 
   const renderItem = ({ item }) => {
-    const isPositive = item.change.startsWith('+');
+    const isPositive = item.change_val && item.change_val.startsWith('+');
     const color = isPositive ? '#d81e06' : '#19be6b'; // Red for up, Green for down
 
     return (
@@ -39,17 +51,17 @@ const MarketScreen = () => {
         </View>
         <View style={styles.priceCol}>
           <Text style={[styles.priceText, { color }]}>${item.price}</Text>
-          <Text style={styles.changeText}>{item.change}</Text>
+          <Text style={styles.changeText}>{item.change_val}</Text>
         </View>
         <View style={styles.changeCol}>
           <View style={[styles.changeBadge, { backgroundColor: color }]}>
-            <Ionicons 
-              name={isPositive ? 'trending-up' : 'trending-down'} 
-              size={14} 
-              color="#fff" 
+            <Ionicons
+              name={isPositive ? 'trending-up' : 'trending-down'}
+              size={14}
+              color="#fff"
               style={styles.trendIcon}
             />
-            <Text style={styles.changePercentText}>{item.changePercent}</Text>
+            <Text style={styles.changePercentText}>{item.change_percent}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -63,11 +75,11 @@ const MarketScreen = () => {
           <Text style={styles.headerTitle}>{t('market.title')}</Text>
           <Text style={styles.headerSubtitle}>Real-time Commodity Prices</Text>
         </View>
-        <TouchableOpacity style={styles.refreshButton}>
+        <TouchableOpacity style={styles.refreshButton} onPress={loadData}>
           <Ionicons name="refresh" size={24} color="#d81e06" />
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.marketSummary}>
         <View style={styles.summaryItem}>
           <Ionicons name="arrow-up" size={20} color="#d81e06" />
@@ -93,12 +105,19 @@ const MarketScreen = () => {
         <Text style={[styles.headerText, styles.priceCol]}>{t('market.price')}</Text>
         <Text style={[styles.headerText, styles.changeCol]}>{t('market.change')}</Text>
       </View>
-      <FlatList
-        data={MOCK_MARKET_DATA}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContent}
-      />
+
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#d81e06" />
+        </View>
+      ) : (
+        <FlatList
+          data={marketData}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
     </SafeAreaView>
   );
 };

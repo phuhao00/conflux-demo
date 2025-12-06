@@ -13,6 +13,7 @@ type User struct {
 	Username      string         `gorm:"size:100" json:"username"`
 	Email         string         `gorm:"uniqueIndex;size:100" json:"email"`
 	Password      string         `gorm:"size:255" json:"-"` // Password hash, not returned in JSON
+	Balance       float64        `gorm:"default:0" json:"balance"`
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
@@ -76,4 +77,20 @@ type Transaction struct {
 	Status    string    `gorm:"size:20;index" json:"status"` // "pending", "success", "failed"
 	TxHash    string    `gorm:"size:66;uniqueIndex" json:"tx_hash"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+// UserAsset represents a user's purchased product/asset
+type UserAsset struct {
+	ID               uint      `gorm:"primarykey" json:"id"`
+	WalletAddress    string    `gorm:"size:42;index" json:"wallet_address"`
+	ProductID        uint      `gorm:"index" json:"product_id"`
+	Product          Product   `gorm:"foreignKey:ProductID" json:"product,omitempty"`
+	TokenID          string    `gorm:"size:100" json:"token_id"`
+	NFTAddress       string    `gorm:"size:42" json:"nft_address"`
+	InvestmentAmount float64   `json:"investment_amount"`
+	PurchaseDate     time.Time `json:"purchase_date"`
+	Status           string    `gorm:"size:20;default:'active'" json:"status"` // "active", "sold", "matured"
+	TxHash           string    `gorm:"size:66" json:"tx_hash"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }

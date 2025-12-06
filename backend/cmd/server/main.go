@@ -8,6 +8,7 @@ import (
 	"conflux-demo/backend/internal/api/routes"
 	"conflux-demo/backend/internal/blockchain"
 	"conflux-demo/backend/internal/database"
+	"conflux-demo/backend/internal/mongodb"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +23,11 @@ func main() {
 	// Initialize database
 	if err := database.Initialize(cfg); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
+	}
+
+	// Initialize MongoDB
+	if err := mongodb.Initialize(cfg); err != nil {
+		log.Printf("Warning: Failed to initialize MongoDB: %v", err)
 	}
 
 	// Initialize Conflux client

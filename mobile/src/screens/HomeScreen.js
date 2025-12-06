@@ -1,28 +1,41 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-
-const MOCK_NEWS = [
-  { id: '1', type: 'policy', title: '2025 Agricultural Subsidy Policy Released', date: '2025-12-01', summary: 'New subsidies for sustainable farming practices have been announced...', icon: 'document-text' },
-  { id: '2', type: 'news', title: 'Global Wheat Prices Surge', date: '2025-12-02', summary: 'Due to unexpected weather patterns, wheat prices have hit a 5-year high.', icon: 'trending-up' },
-  { id: '3', type: 'policy', title: 'Digital Agriculture Infrastructure Plan', date: '2025-11-30', summary: 'Government invests 50B in rural 5G and IoT networks.', icon: 'wifi' },
-  { id: '4', type: 'news', title: 'Smart Farming Tech Expo 2025', date: '2025-11-28', summary: 'The latest innovations in autonomous tractors and drone monitoring.', icon: 'hardware-chip' },
-  { id: '5', type: 'news', title: 'Organic Certification Process Simplified', date: '2025-11-25', summary: 'New streamlined process for farmers to get organic certification.', icon: 'leaf' },
-];
+import { apiClient } from '../api/client';
 
 const HomeScreen = () => {
   const { t } = useTranslation();
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const res = await apiClient.get('/api/news');
+      if (res.ok && res.data) {
+        setNews(res.data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.newsItem}>
       <View style={styles.newsLeft}>
         <View style={[styles.iconCircle, item.type === 'policy' ? styles.policyCircle : styles.newsCircle]}>
-          <Ionicons 
-            name={item.icon} 
-            size={24} 
-            color={item.type === 'policy' ? '#d81e06' : '#1989fa'} 
+          <Ionicons
+            name={item.icon || 'newspaper'}
+            size={24}
+            color={item.type === 'policy' ? '#d81e06' : '#1989fa'}
           />
         </View>
         <View style={styles.newsContent}>
@@ -54,7 +67,7 @@ const HomeScreen = () => {
           </View>
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Ionicons name="trending-up" size={24} color="#52c41a" />
@@ -73,20 +86,26 @@ const HomeScreen = () => {
         </View>
       </View>
 
-      <FlatList
-        data={MOCK_NEWS}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContent}
-        ListHeaderComponent={
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.latestUpdates')}</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAll}>See All</Text>
-            </TouchableOpacity>
-          </View>
-        }
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#d81e06" />
+        </View>
+      ) : (
+        <FlatList
+          data={news}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('home.latestUpdates')}</Text>
+              <TouchableOpacity onPress={loadData}>
+                <Text style={styles.seeAll}>Refresh</Text>
+              </TouchableOpacity>
+            </View>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };

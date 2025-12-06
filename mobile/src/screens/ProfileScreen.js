@@ -1,47 +1,138 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { apiClient } from '../api/client';
 
-const MOCK_TRANSACTIONS = [
-  { id: '1', type: 'deposit', amount: '+$500.00', date: '2025-12-03', status: 'success' },
-  { id: '2', type: 'investment', amount: '-$200.00', date: '2025-12-02', status: 'success' },
-  { id: '3', type: 'yieldPayout', amount: '+$12.50', date: '2025-12-01', status: 'success' },
-  { id: '4', type: 'withdrawal', amount: '-$50.00', date: '2025-11-28', status: 'success' },
-  { id: '5', type: 'deposit', amount: '+$1000.00', date: '2025-11-25', status: 'success' },
-];
+import { DEMO_ADDRESS } from '../utils/constants';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const { t, i18n } = useTranslation();
+  const [balance, setBalance] = useState('0.00');
+  const [loading, setLoading] = useState(false);
+
+  // Modals
+  const [showRecharge, setShowRecharge] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [showMint, setShowMint] = useState(false);
+
+  // Form States
+  const [rechargeAmount, setRechargeAmount] = useState('');
+  const [transferTo, setTransferTo] = useState('');
+  const [transferTokenId, setTransferTokenId] = useState('');
+  const [transferNftAddr, setTransferNftAddr] = useState('');
+
+  const [mintTo, setMintTo] = useState(DEMO_ADDRESS);
+  const [mintTokenId, setMintTokenId] = useState('');
+  const [mintOrigin, setMintOrigin] = useState('Yunnan');
+  const [mintNftAddr, setMintNftAddr] = useState('');
+
+  useEffect(() => {
+    fetchBalance();
+    fetchDefaultAddress();
+  }, []);
+
+  const fetchDefaultAddress = async () => {
+    try {
+      const res = await apiClient.get('/nft/default-address');
+      if (res.ok && res.address) {
+        setTransferNftAddr(res.address);
+        setMintNftAddr(res.address);
+      }
+    } catch (e) {
+      console.log('Failed to fetch default address');
+    }
+  };
+
+  const fetchBalance = async () => {
+    try {
+      const res = await apiClient.get(`/balance/${DEMO_ADDRESS}`);
+      if (res && res.balance !== undefined) {
+        setBalance(res.balance);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRecharge = async () => {
+    if (!rechargeAmount) return;
+    setLoading(true);
+    try {
+      const res = await apiClient.post('/topup', {
+        address: DEMO_ADDRESS,
+        rmb: Number(rechargeAmount)
+      });
+      if (res.ok) {
+        Alert.alert('Success', `Recharged ${rechargeAmount} RMB`);
+        setBalance(res.balance);
+        setShowRecharge(false);
+        setRechargeAmount('');
+      } else {
+        Alert.alert('Error', res.error || 'Recharge failed');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTransferNFT = async () => {
+    if (!transferTo || !transferTokenId || !transferNftAddr) return;
+    setLoading(true);
+    try {
+      const res = await apiClient.post('/relay/nft/transfer', {
+        from: DEMO_ADDRESS,
+        to: transferTo,
+        tokenId: Number(transferTokenId),
+        nftAddress: transferNftAddr
+      });
+      if (res.ok) {
+        Alert.alert('Success', `NFT #${transferTokenId} transferred!`);
+        setShowTransfer(false);
+        fetchBalance(); // Balance might change due to fees (if any logic added later)
+      } else {
+        Alert.alert('Error', res.error || 'Transfer failed');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMintNFT = async () => {
+    if (!mintTokenId || !mintOrigin || !mintNftAddr) return;
+    setLoading(true);
+    try {
+      const res = await apiClient.post('/relay/nft/mint', {
+        from: DEMO_ADDRESS,
+        to: mintTo,
+        tokenId: Number(mintTokenId),
+        nftAddress: mintNftAddr,
+        origin: mintOrigin,
+        harvestTime: Math.floor(Date.now() / 1000),
+        inspectionId: 'QC-' + Date.now()
+      });
+      if (res.ok) {
+        Alert.alert('Success', `NFT #${mintTokenId} minted!`);
+        setShowMint(false);
+        fetchBalance();
+      } else {
+        Alert.alert('Error', res.error || 'Mint failed');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'zh' ? 'en' : 'zh';
     i18n.changeLanguage(newLang);
-  };
-
-  const renderTransaction = ({ item }) => {
-    const isPositive = item.amount.startsWith('+');
-    return (
-      <View style={styles.transactionItem}>
-        <View style={styles.transactionLeft}>
-          <View style={[styles.iconContainer, { backgroundColor: isPositive ? '#e6f7ff' : '#fff1f0' }]}>
-            <Ionicons 
-              name={isPositive ? 'arrow-down' : 'arrow-up'} 
-              size={20} 
-              color={isPositive ? '#1890ff' : '#f5222d'} 
-            />
-          </View>
-          <View>
-            <Text style={styles.transactionType}>{t(`profile.${item.type}`)}</Text>
-            <Text style={styles.transactionDate}>{item.date}</Text>
-          </View>
-        </View>
-        <Text style={[styles.transactionAmount, { color: isPositive ? '#d81e06' : '#333' }]}>
-          {item.amount}
-        </Text>
-      </View>
-    );
   };
 
   return (
@@ -54,41 +145,46 @@ const ProfileScreen = () => {
             </View>
             <View>
               <Text style={styles.userName}>Farmer John</Text>
-              <Text style={styles.userId}>ID: 8839201</Text>
+              <Text style={styles.userId}>ID: {DEMO_ADDRESS.substring(0, 6)}...</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>{t('profile.totalBalance')}</Text>
-          <Text style={styles.balanceValue}>$12,450.80</Text>
+          <Text style={styles.balanceValue}>¥{balance}</Text>
           <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.actionBtn}>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => setShowRecharge(true)}>
               <Ionicons name="wallet-outline" size={24} color="#fff" />
               <Text style={styles.actionBtnText}>{t('profile.recharge')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn}>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => setShowTransfer(true)}>
               <Ionicons name="swap-horizontal-outline" size={24} color="#fff" />
-              <Text style={styles.actionBtnText}>{t('profile.transfer')}</Text>
+              <Text style={styles.actionBtnText}>Transfer NFT</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.menuSection}>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('MyAssets')}
+          >
             <View style={styles.menuLeft}>
-              <Ionicons name="card-outline" size={24} color="#d81e06" />
-              <Text style={styles.menuText}>{t('profile.bankCards')}</Text>
+              <Ionicons name="briefcase-outline" size={24} color="#d81e06" />
+              <Text style={styles.menuText}>My Assets & Transactions</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => setShowMint(true)}>
             <View style={styles.menuLeft}>
-              <Ionicons name="shield-checkmark-outline" size={24} color="#d81e06" />
-              <Text style={styles.menuText}>{t('profile.securityCenter')}</Text>
+              <Ionicons name="add-circle-outline" size={24} color="#d81e06" />
+              <Text style={styles.menuText}>Mint New NFT</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.menuItem} onPress={toggleLanguage}>
             <View style={styles.menuLeft}>
               <Ionicons name="language-outline" size={24} color="#d81e06" />
@@ -99,25 +195,104 @@ const ProfileScreen = () => {
               <Ionicons name="chevron-forward" size={20} color="#ccc" />
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuLeft}>
-              <Ionicons name="help-circle-outline" size={24} color="#d81e06" />
-              <Text style={styles.menuText}>{t('profile.helpSupport')}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
         </View>
 
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('profile.recentTransactions')}</Text>
-        </View>
-        <View style={styles.transactionList}>
-          {MOCK_TRANSACTIONS.map(item => (
-            <View key={item.id}>
-              {renderTransaction({ item })}
+        {/* Recharge Modal */}
+        <Modal visible={showRecharge} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Recharge RMB</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Amount"
+                keyboardType="numeric"
+                value={rechargeAmount}
+                onChangeText={setRechargeAmount}
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={[styles.modalBtn, styles.cancelBtn]} onPress={() => setShowRecharge(false)}>
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modalBtn, styles.confirmBtn]} onPress={handleRecharge}>
+                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.confirmBtnText}>Confirm</Text>}
+                </TouchableOpacity>
+              </View>
             </View>
-          ))}
-        </View>
+          </View>
+        </Modal>
+
+        {/* Transfer NFT Modal */}
+        <Modal visible={showTransfer} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Transfer NFT</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="To Address"
+                value={transferTo}
+                onChangeText={setTransferTo}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Token ID"
+                keyboardType="numeric"
+                value={transferTokenId}
+                onChangeText={setTransferTokenId}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="NFT Contract Address"
+                value={transferNftAddr}
+                onChangeText={setTransferNftAddr}
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={[styles.modalBtn, styles.cancelBtn]} onPress={() => setShowTransfer(false)}>
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modalBtn, styles.confirmBtn]} onPress={handleTransferNFT}>
+                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.confirmBtnText}>Transfer</Text>}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Mint NFT Modal */}
+        <Modal visible={showMint} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Mint NFT</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Token ID"
+                keyboardType="numeric"
+                value={mintTokenId}
+                onChangeText={setMintTokenId}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Origin"
+                value={mintOrigin}
+                onChangeText={setMintOrigin}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="NFT Contract Address"
+                value={mintNftAddr}
+                onChangeText={setMintNftAddr}
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={[styles.modalBtn, styles.cancelBtn]} onPress={() => setShowMint(false)}>
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modalBtn, styles.confirmBtn]} onPress={handleMintNFT}>
+                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.confirmBtnText}>Mint</Text>}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -233,51 +408,54 @@ const styles = StyleSheet.create({
     color: '#666',
     marginRight: 8,
   },
-  sectionHeader: {
-    paddingHorizontal: 16,
-    marginBottom: 12,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  transactionList: {
+  modalContent: {
     backgroundColor: '#fff',
-    paddingHorizontal: 16,
+    borderRadius: 12,
+    padding: 20,
   },
-  transactionItem: {
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  modalBtn: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 8,
     alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    marginHorizontal: 6,
   },
-  transactionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  cancelBtn: {
+    backgroundColor: '#f5f5f5',
   },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+  confirmBtn: {
+    backgroundColor: '#d81e06',
   },
-  transactionType: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+  cancelBtnText: {
+    color: '#666',
+    fontWeight: 'bold',
   },
-  transactionDate: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-  },
-  transactionAmount: {
-    fontSize: 16,
+  confirmBtnText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
 });

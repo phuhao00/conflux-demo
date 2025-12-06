@@ -1,5 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
@@ -8,8 +9,28 @@ import MarketScreen from '../screens/MarketScreen';
 import CommunityScreen from '../screens/CommunityScreen';
 import ProductScreen from '../screens/ProductScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import MyAssetsScreen from '../screens/MyAssetsScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+// Profile Stack Navigator
+const ProfileStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ProfileMain" component={ProfileScreen} />
+      <Stack.Screen
+        name="MyAssets"
+        component={MyAssetsScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'My Assets',
+          headerBackTitleVisible: false,
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
 
 const AppNavigator = () => {
   const { t } = useTranslation();
@@ -35,7 +56,7 @@ const AppNavigator = () => {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#d81e06', // Tonghuashun red-ish
+        tabBarActiveTintColor: '#d81e06',
         tabBarInactiveTintColor: 'gray',
         headerShown: false,
       })}
@@ -44,7 +65,7 @@ const AppNavigator = () => {
       <Tab.Screen name="Market" component={MarketScreen} options={{ title: t('common.market') }} />
       <Tab.Screen name="Community" component={CommunityScreen} options={{ title: t('common.community') }} />
       <Tab.Screen name="Product" component={ProductScreen} options={{ title: t('common.product') }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: t('common.profile') }} />
+      <Tab.Screen name="Profile" component={ProfileStack} options={{ title: t('common.profile') }} />
     </Tab.Navigator>
   );
 };

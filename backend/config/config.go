@@ -17,6 +17,9 @@ type Config struct {
 	DBPassword string
 	DBName     string
 
+	MongoURI      string
+	MongoDatabase string
+
 	JWTSecret string
 
 	ConfluxRPCURL    string
@@ -42,6 +45,9 @@ func Load() *Config {
 		DBUser:     getEnv("DB_USER", "root"),
 		DBPassword: getEnv("DB_PASSWORD", ""),
 		DBName:     getEnv("DB_NAME", "conflux_agri"),
+
+		MongoURI:      getEnv("MONGO_URI", "mongodb://localhost:27017"),
+		MongoDatabase: getEnv("MONGO_DATABASE", "conflux_agri"),
 
 		ConfluxRPCURL:    getEnv("CONFLUX_RPC_URL", "https://test.confluxrpc.com"),
 		ConfluxNetworkID: 1,

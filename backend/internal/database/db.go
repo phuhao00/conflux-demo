@@ -52,6 +52,7 @@ func autoMigrate() error {
 		&models.Post{},
 		&models.Product{},
 		&models.Transaction{},
+		&models.UserAsset{},
 	)
 }
 

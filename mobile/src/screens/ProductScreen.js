@@ -1,19 +1,34 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-
-const MOCK_PRODUCTS = [
-  { id: '1', name: 'Organic Apple Orchard Share', yield: '8.5%', price: '$500', duration: '12 Months', risk: 'low', icon: 'nutrition' },
-  { id: '2', name: 'Sustainable Wheat Farm Bond', yield: '6.2%', price: '$100', duration: '6 Months', risk: 'low', icon: 'barley' },
-  { id: '3', name: 'High-Tech Greenhouse Fund', yield: '12.4%', price: '$1000', duration: '24 Months', risk: 'medium', icon: 'greenhouse' },
-  { id: '4', name: 'Dairy Farm Expansion Token', yield: '9.1%', price: '$250', duration: '18 Months', risk: 'low', icon: 'cow' },
-  { id: '5', name: 'Vertical Farming Venture', yield: '15.0%', price: '$2000', duration: '36 Months', risk: 'high', icon: 'sprout' },
-];
+import { apiClient } from '../api/client';
+import { DEMO_ADDRESS } from '../utils/constants';
 
 const ProductScreen = () => {
   const { t } = useTranslation();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const res = await apiClient.get('/api/products');
+      if (res.ok && res.data) {
+        setProducts(res.data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getIconComponent = (iconName) => {
     const iconProps = { size: 48, color: '#d81e06' };
@@ -46,8 +61,60 @@ const ProductScreen = () => {
     }
   };
 
+  const [showInvest, setShowInvest] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [investAmount, setInvestAmount] = useState('1');
+
+  const handleInvestPress = (product) => {
+    setSelectedProduct(product);
+    setShowInvest(true);
+  };
+
+  const handleInvestConfirm = async () => {
+    if (!selectedProduct) return;
+    setLoading(true);
+    try {
+      // Generate a random Token ID for demo purposes
+      const tokenId = Math.floor(Date.now() / 1000);
+      const txHash = '0x' + Math.random().toString(16).substr(2, 64); // Mock tx hash
+
+      // Parse investment amount
+      const amount = parseFloat(investAmount) || 1;
+      const totalAmount = amount * parseFloat(selectedProduct.price.replace(/[^0-9.]/g, ''));
+
+      // Record investment in database
+      const res = await apiClient.post('/invest', {
+        wallet_address: DEMO_ADDRESS,
+        product_id: selectedProduct.id,
+        investment_amount: totalAmount,
+        token_id: tokenId.toString(),
+        nft_address: '', // Will be filled by backend if needed
+        tx_hash: txHash
+      });
+
+      if (res.ok) {
+        // Close modal first
+        setShowInvest(false);
+        // Then show success message
+        setTimeout(() => {
+          Alert.alert(
+            'Success!',
+            `Investment of ¥${totalAmount.toFixed(2)} recorded successfully!\n\nYou can view your assets in Profile → My Assets & Transactions`
+          );
+        }, 300);
+      } else {
+        Alert.alert('Error', res.error || 'Investment failed');
+      }
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Error', 'Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.productCard}>
+    <TouchableOpacity style={styles.productCard} onPress={() => handleInvestPress(item)}>
       <View style={styles.cardTop}>
         <View style={styles.iconContainer}>
           {getIconComponent(item.icon)}
@@ -58,13 +125,13 @@ const ProductScreen = () => {
           </Text>
         </View>
       </View>
-      
+
       <Text style={styles.productName}>{item.name}</Text>
-      
+
       <View style={styles.cardBody}>
         <View style={styles.infoItem}>
           <Ionicons name="trending-up" size={20} color="#d81e06" />
-          <Text style={styles.yieldValue}>{item.yield}</Text>
+          <Text style={styles.yieldValue}>{item.yield_rate}</Text>
           <Text style={styles.infoLabel}>{t('product.expectedYield')}</Text>
         </View>
         <View style={styles.infoItem}>
@@ -78,8 +145,8 @@ const ProductScreen = () => {
           <Text style={styles.infoLabel}>{t('product.minInvest')}</Text>
         </View>
       </View>
-      
-      <TouchableOpacity style={styles.investButton}>
+
+      <TouchableOpacity style={styles.investButton} onPress={() => handleInvestPress(item)}>
         <Ionicons name="arrow-forward-circle" size={20} color="#fff" style={styles.buttonIcon} />
         <Text style={styles.investButtonText}>{t('product.investNow')}</Text>
       </TouchableOpacity>
@@ -93,16 +160,43 @@ const ProductScreen = () => {
           <Text style={styles.headerTitle}>{t('product.title')}</Text>
           <Text style={styles.headerSubtitle}>Real World Assets</Text>
         </View>
-        <TouchableOpacity style={styles.filterButton}>
+        <TouchableOpacity style={styles.filterButton} onPress={loadData}>
           <Ionicons name="filter" size={24} color="#d81e06" />
         </TouchableOpacity>
       </View>
-      <FlatList
-        data={MOCK_PRODUCTS}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContent}
-      />
+
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#d81e06" />
+        </View>
+      ) : (
+        <FlatList
+          data={products}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
+
+      {/* Invest Modal */}
+      {selectedProduct && (
+        <View style={[styles.modalOverlay, !showInvest && { display: 'none' }]}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Invest in {selectedProduct.name}</Text>
+            <Text style={styles.modalSubtitle}>Expected Yield: {selectedProduct.yield_rate}</Text>
+            <Text style={styles.modalPrice}>Min Investment: {selectedProduct.price}</Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={[styles.modalBtn, styles.cancelBtn]} onPress={() => setShowInvest(false)}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalBtn, styles.confirmBtn]} onPress={handleInvestConfirm}>
+                <Text style={styles.confirmBtnText}>Confirm Invest</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -230,6 +324,76 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  // Modal Styles
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+    color: '#333',
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#d81e06',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  modalPrice: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginHorizontal: 6,
+  },
+  cancelBtn: {
+    backgroundColor: '#f5f5f5',
+  },
+  confirmBtn: {
+    backgroundColor: '#d81e06',
+  },
+  cancelBtnText: {
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  confirmBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
