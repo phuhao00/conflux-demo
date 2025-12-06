@@ -85,12 +85,13 @@ func GetUserTransactions(c *gin.Context) {
 	var mobileTxs []gin.H
 	for _, tx := range transactions {
 		mobileTxs = append(mobileTxs, gin.H{
-			"id":         tx.ID,
-			"type":       tx.Type,
-			"amount":     tx.Amount,
-			"status":     tx.Status,
-			"tx_hash":    tx.TxHash,
-			"created_at": tx.CreatedAt.Format("2006-01-02 15:04:05"),
+			"id":             tx.ID,
+			"type":           tx.Type,
+			"amount":         tx.Amount,
+			"status":         tx.Status,
+			"payment_method": tx.PaymentMethod,
+			"tx_hash":        tx.TxHash,
+			"created_at":     tx.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 

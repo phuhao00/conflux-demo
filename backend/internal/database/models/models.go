@@ -69,14 +69,15 @@ type Product struct {
 
 // Transaction represents a blockchain transaction
 type Transaction struct {
-	ID        uint      `gorm:"primarykey" json:"id"`
-	UserID    uint      `gorm:"index" json:"user_id"`
-	User      User      `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	Type      string    `gorm:"size:50" json:"type"` // "deposit", "withdrawal", "investment", "yieldPayout"
-	Amount    string    `gorm:"size:100" json:"amount"`
-	Status    string    `gorm:"size:20;index" json:"status"` // "pending", "success", "failed"
-	TxHash    string    `gorm:"size:66;uniqueIndex" json:"tx_hash"`
-	CreatedAt time.Time `json:"created_at"`
+	ID            uint      `gorm:"primarykey" json:"id"`
+	UserID        uint      `gorm:"index" json:"user_id"`
+	User          User      `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Type          string    `gorm:"size:50" json:"type"` // "deposit", "withdrawal", "investment", "yieldPayout"
+	Amount        string    `gorm:"size:100" json:"amount"`
+	Status        string    `gorm:"size:20;index" json:"status"`   // "pending", "success", "failed"
+	PaymentMethod string    `gorm:"size:20" json:"payment_method"` // "alipay", "wechat", "bank", "crypto"
+	TxHash        string    `gorm:"size:66;uniqueIndex" json:"tx_hash"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 // UserAsset represents a user's purchased product/asset

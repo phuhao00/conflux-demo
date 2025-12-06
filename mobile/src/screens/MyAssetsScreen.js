@@ -127,31 +127,57 @@ const MyAssetsScreen = () => {
         </View>
     );
 
-    const renderTransaction = ({ item }) => (
-        <View style={styles.transactionCard}>
-            <View style={styles.txHeader}>
-                <View style={[styles.txTypeIcon, { backgroundColor: getTypeColor(item.type) + '20' }]}>
-                    <Ionicons
-                        name={item.type === 'investment' ? 'trending-up' : item.type === 'deposit' ? 'arrow-down' : 'arrow-up'}
-                        size={20}
-                        color={getTypeColor(item.type)}
-                    />
-                </View>
-                <View style={styles.txInfo}>
-                    <Text style={styles.txType}>{item.type}</Text>
-                    <Text style={styles.txDate}>{item.created_at}</Text>
-                </View>
-                <View style={styles.txAmount}>
-                    <Text style={[styles.txAmountText, { color: getTypeColor(item.type) }]}>
-                        {item.type === 'withdrawal' ? '-' : '+'}¥{item.amount}
-                    </Text>
-                    <View style={[styles.txStatus, { backgroundColor: item.status === 'success' ? '#4CAF50' : '#FF9800' }]}>
-                        <Text style={styles.txStatusText}>{item.status}</Text>
+    const renderTransaction = ({ item }) => {
+        const getPaymentMethodIcon = (method) => {
+            if (method === 'alipay') return 'logo-alipay';
+            if (method === 'wechat') return 'logo-wechat';
+            return 'card-outline';
+        };
+
+        const getPaymentMethodColor = (method) => {
+            if (method === 'alipay') return '#1677FF';
+            if (method === 'wechat') return '#07C160';
+            return '#666';
+        };
+
+        return (
+            <View style={styles.transactionCard}>
+                <View style={styles.txHeader}>
+                    <View style={[styles.txTypeIcon, { backgroundColor: getTypeColor(item.type) + '20' }]}>
+                        <Ionicons
+                            name={item.type === 'investment' ? 'trending-up' : item.type === 'deposit' ? 'arrow-down' : 'arrow-up'}
+                            size={20}
+                            color={getTypeColor(item.type)}
+                        />
+                    </View>
+                    <View style={styles.txInfo}>
+                        <Text style={styles.txType}>{item.type}</Text>
+                        <Text style={styles.txDate}>{item.created_at}</Text>
+                        {item.payment_method && (
+                            <View style={styles.paymentMethodBadge}>
+                                <Ionicons
+                                    name={getPaymentMethodIcon(item.payment_method)}
+                                    size={12}
+                                    color={getPaymentMethodColor(item.payment_method)}
+                                />
+                                <Text style={[styles.paymentMethodText, { color: getPaymentMethodColor(item.payment_method) }]}>
+                                    {item.payment_method === 'alipay' ? '支付宝' : item.payment_method === 'wechat' ? '微信' : item.payment_method}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                    <View style={styles.txAmount}>
+                        <Text style={[styles.txAmountText, { color: getTypeColor(item.type) }]}>
+                            {item.type === 'withdrawal' ? '-' : '+'}¥{item.amount}
+                        </Text>
+                        <View style={[styles.txStatus, { backgroundColor: item.status === 'success' ? '#4CAF50' : '#FF9800' }]}>
+                            <Text style={styles.txStatusText}>{item.status}</Text>
+                        </View>
                     </View>
                 </View>
             </View>
-        </View>
-    );
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
@@ -415,6 +441,16 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: '600',
         textTransform: 'uppercase',
+    },
+    paymentMethodBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    paymentMethodText: {
+        fontSize: 11,
+        marginLeft: 4,
+        fontWeight: '500',
     },
     // Empty State
     emptyContainer: {

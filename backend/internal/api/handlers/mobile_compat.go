@@ -133,8 +133,9 @@ func MobileBalance(c *gin.Context) {
 
 func MobileTopUp(c *gin.Context) {
 	var input struct {
-		Address string  `json:"address"`
-		RMB     float64 `json:"rmb"`
+		Address       string  `json:"address"`
+		RMB           float64 `json:"rmb"`
+		PaymentMethod string  `json:"payment_method"` // "alipay", "wechat"
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
@@ -144,6 +145,12 @@ func MobileTopUp(c *gin.Context) {
 	if input.RMB <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Amount must be positive"})
 		return
+	}
+
+	// Default payment method if not provided
+	paymentMethod := input.PaymentMethod
+	if paymentMethod == "" {
+		paymentMethod = "alipay"
 	}
 
 	// Find or create user
@@ -169,9 +176,32 @@ func MobileTopUp(c *gin.Context) {
 		}
 	}
 
+	// Create transaction record
+	transaction := models.Transaction{
+		UserID:        user.ID,
+		Type:          "deposit",
+		Amount:        fmt.Sprintf("%.2f", input.RMB),
+		Status:        "success",
+		PaymentMethod: paymentMethod,
+		TxHash:        fmt.Sprintf("0x%x", time.Now().UnixNano()), // Mock tx hash
+		CreatedAt:     time.Now(),
+	}
+
+	if err := database.GetDB().Create(&transaction).Error; err != nil {
+		// Log error but don't fail the request
+		c.JSON(http.StatusOK, gin.H{
+			"ok":      true,
+			"balance": fmt.Sprintf("%.2f", user.Balance),
+			"warning": "Balance updated but transaction record may not be saved",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"ok":      true,
-		"balance": fmt.Sprintf("%.2f", user.Balance),
+		"ok":             true,
+		"balance":        fmt.Sprintf("%.2f", user.Balance),
+		"payment_method": paymentMethod,
+		"transaction_id": transaction.ID,
 	})
 }
 

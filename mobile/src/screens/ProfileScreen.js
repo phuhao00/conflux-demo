@@ -56,19 +56,36 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
 
-  const handleRecharge = async () => {
-    if (!rechargeAmount) return;
+  const handleRecharge = async (paymentMethod) => {
+    if (!rechargeAmount || parseFloat(rechargeAmount) <= 0) {
+      Alert.alert('错误 Error', '请输入有效金额 Please enter a valid amount');
+      return;
+    }
+
     setLoading(true);
     try {
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
       const res = await apiClient.post('/topup', {
         address: DEMO_ADDRESS,
-        rmb: Number(rechargeAmount)
+        rmb: Number(rechargeAmount),
+        payment_method: paymentMethod
       });
+
       if (res.ok) {
-        Alert.alert('Success', `Recharged ${rechargeAmount} RMB`);
-        setBalance(res.balance);
         setShowRecharge(false);
         setRechargeAmount('');
+        setBalance(res.balance);
+
+        // Show success message after modal closes
+        setTimeout(() => {
+          const methodName = paymentMethod === 'alipay' ? '支付宝 Alipay' : '微信支付 WeChat Pay';
+          Alert.alert(
+            '充值成功 Success!',
+            `已通过 ${methodName} 充值 ¥${rechargeAmount}\n\nRecharged ¥${rechargeAmount} via ${methodName}\n\n当前余额 Current Balance: ¥${res.balance}`
+          );
+        }, 300);
       } else {
         Alert.alert('Error', res.error || 'Recharge failed');
       }
@@ -201,22 +218,71 @@ const ProfileScreen = ({ navigation }) => {
         <Modal visible={showRecharge} transparent animationType="slide">
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Recharge RMB</Text>
+              <Text style={styles.modalTitle}>充值 Recharge</Text>
+
+              {/* Amount Input */}
               <TextInput
                 style={styles.input}
-                placeholder="Amount"
+                placeholder="输入充值金额 Enter Amount"
                 keyboardType="numeric"
                 value={rechargeAmount}
                 onChangeText={setRechargeAmount}
               />
-              <View style={styles.modalButtons}>
-                <TouchableOpacity style={[styles.modalBtn, styles.cancelBtn]} onPress={() => setShowRecharge(false)}>
-                  <Text style={styles.cancelBtnText}>Cancel</Text>
+
+              {/* Quick Amount Selection */}
+              <View style={styles.quickAmounts}>
+                {[100, 500, 1000, 5000].map(amount => (
+                  <TouchableOpacity
+                    key={amount}
+                    style={styles.quickAmountBtn}
+                    onPress={() => setRechargeAmount(amount.toString())}
+                  >
+                    <Text style={styles.quickAmountText}>¥{amount}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Payment Method Selection */}
+              <Text style={styles.paymentMethodTitle}>选择支付方式 Payment Method</Text>
+              <View style={styles.paymentMethods}>
+                <TouchableOpacity
+                  style={styles.paymentMethodBtn}
+                  onPress={() => handleRecharge('alipay')}
+                  disabled={loading}
+                >
+                  <View style={[styles.paymentIcon, { backgroundColor: '#1677FF' }]}>
+                    <Ionicons name="logo-alipay" size={32} color="#fff" />
+                  </View>
+                  <Text style={styles.paymentMethodText}>支付宝</Text>
+                  <Text style={styles.paymentMethodSubtext}>Alipay</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.modalBtn, styles.confirmBtn]} onPress={handleRecharge}>
-                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.confirmBtnText}>Confirm</Text>}
+
+                <TouchableOpacity
+                  style={styles.paymentMethodBtn}
+                  onPress={() => handleRecharge('wechat')}
+                  disabled={loading}
+                >
+                  <View style={[styles.paymentIcon, { backgroundColor: '#07C160' }]}>
+                    <Ionicons name="logo-wechat" size={32} color="#fff" />
+                  </View>
+                  <Text style={styles.paymentMethodText}>微信支付</Text>
+                  <Text style={styles.paymentMethodSubtext}>WeChat Pay</Text>
                 </TouchableOpacity>
               </View>
+
+              {loading && (
+                <View style={styles.loadingOverlay}>
+                  <ActivityIndicator size="large" color="#d81e06" />
+                  <Text style={styles.loadingText}>Processing payment...</Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.cancelBtn, { marginTop: 16 }]}
+                onPress={() => setShowRecharge(false)}
+              >
+                <Text style={styles.cancelBtnText}>取消 Cancel</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -457,6 +523,76 @@ const styles = StyleSheet.create({
   confirmBtnText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  // Payment Method Styles
+  quickAmounts: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  quickAmountBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginHorizontal: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#d81e06',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  quickAmountText: {
+    color: '#d81e06',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  paymentMethodTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  paymentMethods: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  paymentMethodBtn: {
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    backgroundColor: '#fff',
+    width: '45%',
+  },
+  paymentIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  paymentMethodText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 4,
+  },
+  paymentMethodSubtext: {
+    fontSize: 11,
+    color: '#999',
+    marginTop: 2,
+  },
+  loadingOverlay: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666',
   },
 });
 
