@@ -33,6 +33,12 @@ const ProductScreen = () => {
   const getIconComponent = (iconName) => {
     const iconProps = { size: 48, color: '#d81e06' };
     switch (iconName) {
+      case 'musical-notes':
+        return <Ionicons name="musical-notes" {...iconProps} />;
+      case 'color-palette':
+        return <Ionicons name="color-palette" {...iconProps} />;
+      case 'cube':
+        return <Ionicons name="cube" {...iconProps} />;
       case 'nutrition':
         return <Ionicons name="nutrition" {...iconProps} />;
       case 'barley':
@@ -44,7 +50,7 @@ const ProductScreen = () => {
       case 'sprout':
         return <MaterialCommunityIcons name="sprout" {...iconProps} />;
       default:
-        return <Ionicons name="leaf" {...iconProps} />;
+        return <Ionicons name="cube-outline" {...iconProps} />;
     }
   };
 
@@ -158,7 +164,7 @@ const ProductScreen = () => {
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>{t('product.title')}</Text>
-          <Text style={styles.headerSubtitle}>Real World Assets</Text>
+          <Text style={styles.headerSubtitle}>NFT & Digital Collectibles</Text>
         </View>
         <TouchableOpacity style={styles.filterButton} onPress={loadData}>
           <Ionicons name="filter" size={24} color="#d81e06" />

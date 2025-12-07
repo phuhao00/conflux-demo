@@ -3,11 +3,11 @@
     "home": "首页",
     "market": "行情",
     "community": "社区",
-    "product": "商品",
+    "product": "资产",
     "profile": "我的"
   },
   "home": {
-    "title": "AgriFinance",
+    "title": "数字金融",
     "latestUpdates": "最新动态",
     "policy": "政策",
     "news": "新闻"
@@ -23,18 +23,18 @@
     "ago": "前"
   },
   "product": {
-    "title": "RWA产品",
+    "title": "数字资产",
     "expectedYield": "预期收益",
     "duration": "期限",
     "minInvest": "最低投资",
     "investNow": "立即投资",
-    "low": "低",
-    "medium": "中",
-    "high": "高"
+    "low": "低风险",
+    "medium": "中风险",
+    "high": "高风险"
   },
   "profile": {
     "title": "我的",
-    "totalBalance": "总余额 (USD)",
+    "totalBalance": "总余额 (CNY)",
     "recharge": "充值",
     "transfer": "转账",
     "bankCards": "银行卡",

@@ -49,11 +49,11 @@ func main() {
 		db.Create(&md)
 	}
 
-	// Seed products
+	// Seed products (Digital Assets)
 	products := []models.Product{
-		{Name: "Organic Apple Orchard Share", Icon: "nutrition", YieldRate: "8.5%", Price: "$500", Duration: "12 Months", RiskLevel: "low"},
-		{Name: "Sustainable Wheat Farm Bond", Icon: "barley", YieldRate: "6.2%", Price: "$100", Duration: "6 Months", RiskLevel: "low"},
-		{Name: "High-Tech Greenhouse Fund", Icon: "greenhouse", YieldRate: "12.4%", Price: "$1000", Duration: "24 Months", RiskLevel: "medium"},
+		{Name: "Premium Music NFT Collection", Icon: "musical-notes", YieldRate: "8.5%", Price: "¥500", Duration: "12 Months", RiskLevel: "low"},
+		{Name: "Digital Art Investment Fund", Icon: "color-palette", YieldRate: "6.2%", Price: "¥100", Duration: "6 Months", RiskLevel: "low"},
+		{Name: "Metaverse Real Estate Token", Icon: "cube", YieldRate: "12.4%", Price: "¥1000", Duration: "24 Months", RiskLevel: "medium"},
 	}
 	for _, p := range products {
 		db.FirstOrCreate(&p, models.Product{Name: p.Name})

@@ -3,11 +3,11 @@
     "home": "Home",
     "market": "Market",
     "community": "Community",
-    "product": "Product",
+    "product": "Assets",
     "profile": "Me"
   },
   "home": {
-    "title": "AgriFinance",
+    "title": "Digital Finance",
     "latestUpdates": "Latest Updates",
     "policy": "Policy",
     "news": "News"
@@ -23,18 +23,18 @@
     "ago": "ago"
   },
   "product": {
-    "title": "RWA Products",
+    "title": "Digital Assets",
     "expectedYield": "Exp. Yield",
     "duration": "Duration",
     "minInvest": "Min. Invest",
     "investNow": "Invest Now",
-    "low": "Low",
-    "medium": "Medium",
-    "high": "High"
+    "low": "Low Risk",
+    "medium": "Medium Risk",
+    "high": "High Risk"
   },
   "profile": {
     "title": "Me",
-    "totalBalance": "Total Balance (USD)",
+    "totalBalance": "Total Balance (CNY)",
     "recharge": "Recharge",
     "transfer": "Transfer",
     "bankCards": "Bank Cards",
