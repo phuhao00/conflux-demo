@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字证书 - Conflux Farm</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .certificates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+
+        .certificate-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .certificate-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .certificate-header {
+            background: linear-gradient(135deg, #7c8ff5 0%, #9b7fd9 100%);
+            padding: 24px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .certificate-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+
+        .certificate-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .certificate-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .certificate-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .certificate-id {
+            font-size: 13px;
+            opacity: 0.9;
+            font-family: 'Courier New', monospace;
+        }
+
+        .certificate-body {
+            padding: 24px;
+        }
+
+        .certificate-info {
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e8ecf1;
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #8492a6;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .certificate-qr {
+            text-align: center;
+            padding: 20px;
+            background: #f5f7fa;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .qr-code {
+            width: 120px;
+            height: 120px;
+            background: white;
+            margin: 0 auto 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            border: 2px solid #e8ecf1;
+        }
+
+        .qr-hint {
+            font-size: 12px;
+            color: #8492a6;
+        }
+
+        .certificate-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .cert-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #dcdfe6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            color: #5a6c7d;
+        }
+
+        .cert-btn:hover {
+            border-color: #7c8ff5;
+            color: #7c8ff5;
+            background: #f5f7fa;
+        }
+
+        .cert-btn.primary {
+            background: #7c8ff5;
+            color: white;
+            border-color: #7c8ff5;
+        }
+
+        .cert-btn.primary:hover {
+            background: #6a7ee3;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            border: 1px solid #dcdfe6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-tab:hover {
+            border-color: #7c8ff5;
+            color: #7c8ff5;
+        }
+
+        .filter-tab.active {
+            background: #7c8ff5;
+            color: white;
+            border-color: #7c8ff5;
+        }
+
+        .stats-banner {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #7c8ff5;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #8492a6;
+        }
+
+        .cert-type-organic {
+            background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+        }
+
+        .cert-type-quality {
+            background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+        }
+
+        .cert-type-origin {
+            background: linear-gradient(135deg, #e6a23c 0%, #ebb563 100%);
+        }
+
+        .cert-type-safety {
+            background: linear-gradient(135deg, #f56c6c 0%, #f78989 100%);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <div class="logo-icon">🌾</div>
+                <span>Conflux Farm</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="products.html">产品种类</a></li>
+                <li><a href="certificates.html" class="active">数字证书</a></li>
+                <li><a href="traceability.html">溯源管理</a></li>
+                <li><a href="operations.html">我的</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="page-container">
+            <h1 class="page-title">数字证书</h1>
+            <p class="page-subtitle">查看和管理农产品质量认证证书</p>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-container">
+        <!-- 统计横幅 -->
+        <div class="stats-banner">
+            <div class="stat-item">
+                <div class="stat-number">1,245</div>
+                <div class="stat-label">证书总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">856</div>
+                <div class="stat-label">有效证书</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">98.2%</div>
+                <div class="stat-label">认证通过率</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">156</div>
+                <div class="stat-label">本月新增</div>
+            </div>
+        </div>
+
+        <!-- 筛选标签 -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterCertificates('all')">全部证书</button>
+            <button class="filter-tab" onclick="filterCertificates('organic')">有机认证</button>
+            <button class="filter-tab" onclick="filterCertificates('quality')">质量认证</button>
+            <button class="filter-tab" onclick="filterCertificates('origin')">原产地认证</button>
+            <button class="filter-tab" onclick="filterCertificates('safety')">食品安全</button>
+        </div>
+
+        <!-- 证书网格 -->
+        <div class="certificates-grid" id="certificatesGrid">
+            <!-- 证书卡片将通过 JavaScript 动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        const certificates = [
+            {
+                id: 'CERT-ORG-2024-001',
+                type: 'organic',
+                typeName: '有机认证',
+                typeClass: 'cert-type-organic',
+                icon: '🌱',
+                title: '有机产品认证证书',
+                product: '有机大米',
+                enterprise: '黑龙江五常米业有限公司',
+                issuer: '中国有机产品认证中心',
+                issueDate: '2024-01-15',
+                expiryDate: '2025-01-14',
+                certNumber: 'ORG-2024-HLJ-001',
+                status: '有效'
+            },
+            {
+                id: 'CERT-QLT-2024-002',
+                type: 'quality',
+                typeName: '质量认证',
+                typeClass: 'cert-type-quality',
+                icon: '⭐',
+                title: '优质农产品认证',
+                product: '云南普洱茶',
+                enterprise: '云南普洱茶业集团',
+                issuer: '国家质量监督检验检疫总局',
+                issueDate: '2024-03-20',
+                expiryDate: '2025-03-19',
+                certNumber: 'QLT-2024-YN-002',
+                status: '有效'
+            },
+            {
+                id: 'CERT-ORI-2024-003',
+                type: 'origin',
+                typeName: '原产地认证',
+                typeClass: 'cert-type-origin',
+                icon: '📍',
+                title: '地理标志产品认证',
+                product: '陕西洛川苹果',
+                enterprise: '陕西洛川果业有限公司',
+                issuer: '国家知识产权局',
+                issueDate: '2024-02-10',
+                expiryDate: '2027-02-09',
+                certNumber: 'GEO-2024-SX-003',
+                status: '有效'
+            },
+            {
+                id: 'CERT-SAF-2024-004',
+                type: 'safety',
+                typeName: '食品安全',
+                typeClass: 'cert-type-safety',
+                icon: '🛡️',
+                title: '食品安全管理体系认证',
+                product: '山东寿光蔬菜',
+                enterprise: '山东寿光农业科技有限公司',
+                issuer: '中国食品安全认证中心',
+                issueDate: '2024-04-05',
+                expiryDate: '2025-04-04',
+                certNumber: 'FSMS-2024-SD-004',
+                status: '有效'
+            },
+            {
+                id: 'CERT-ORG-2024-005',
+                type: 'organic',
+                typeName: '有机认证',
+                typeClass: 'cert-type-organic',
+                icon: '🌱',
+                title: '有机茶叶认证证书',
+                product: '福建安溪铁观音',
+                enterprise: '福建安溪茶业有限公司',
+                issuer: '中国有机产品认证中心',
+                issueDate: '2024-05-12',
+                expiryDate: '2025-05-11',
+                certNumber: 'ORG-2024-FJ-005',
+                status: '有效'
+            },
+            {
+                id: 'CERT-QLT-2024-006',
+                type: 'quality',
+                typeName: '质量认证',
+                typeClass: 'cert-type-quality',
+                icon: '⭐',
+                title: 'ISO 9001质量管理体系',
+                product: '河南优质小麦',
+                enterprise: '河南粮食集团有限公司',
+                issuer: '中国质量认证中心',
+                issueDate: '2024-06-18',
+                expiryDate: '2027-06-17',
+                certNumber: 'ISO-2024-HN-006',
+                status: '有效'
+            },
+            {
+                id: 'CERT-ORI-2024-007',
+                type: 'origin',
+                typeName: '原产地认证',
+                typeClass: 'cert-type-origin',
+                icon: '📍',
+                title: '地理标志保护产品',
+                product: '江西赣南脐橙',
+                enterprise: '江西赣南果业有限公司',
+                issuer: '国家市场监督管理总局',
+                issueDate: '2024-07-22',
+                expiryDate: '2027-07-21',
+                certNumber: 'GEO-2024-JX-007',
+                status: '有效'
+            },
+            {
+                id: 'CERT-SAF-2024-008',
+                type: 'safety',
+                typeName: '食品安全',
+                typeClass: 'cert-type-safety',
+                icon: '🛡️',
+                title: 'HACCP食品安全认证',
+                product: '吉林甜玉米',
+                enterprise: '吉林农业科技股份有限公司',
+                issuer: '中国食品安全认证中心',
+                issueDate: '2024-08-15',
+                expiryDate: '2025-08-14',
+                certNumber: 'HACCP-2024-JL-008',
+                status: '有效'
+            },
+            {
+                id: 'CERT-ORG-2024-009',
+                type: 'organic',
+                typeName: '有机认证',
+                typeClass: 'cert-type-organic',
+                icon: '🌱',
+                title: '有机蔬菜认证证书',
+                product: '有机黄瓜',
+                enterprise: '北京有机农场有限公司',
+                issuer: '中国有机产品认证中心',
+                issueDate: '2024-09-10',
+                expiryDate: '2025-09-09',
+                certNumber: 'ORG-2024-BJ-009',
+                status: '有效'
+            },
+            {
+                id: 'CERT-QLT-2024-010',
+                type: 'quality',
+                typeName: '质量认证',
+                typeClass: 'cert-type-quality',
+                icon: '⭐',
+                title: '绿色食品认证',
+                product: '大棚草莓',
+                enterprise: '浙江草莓种植基地',
+                issuer: '中国绿色食品发展中心',
+                issueDate: '2024-10-05',
+                expiryDate: '2025-10-04',
+                certNumber: 'GRN-2024-ZJ-010',
+                status: '有效'
+            },
+            {
+                id: 'CERT-ORI-2024-011',
+                type: 'origin',
+                typeName: '原产地认证',
+                typeClass: 'cert-type-origin',
+                icon: '📍',
+                title: '农产品地理标志',
+                product: '新疆番茄',
+                enterprise: '新疆番茄产业集团',
+                issuer: '农业农村部',
+                issueDate: '2024-11-12',
+                expiryDate: '2027-11-11',
+                certNumber: 'AGI-2024-XJ-011',
+                status: '有效'
+            },
+            {
+                id: 'CERT-SAF-2024-012',
+                type: 'safety',
+                typeName: '食品安全',
+                typeClass: 'cert-type-safety',
+                icon: '🛡️',
+                title: '食品生产许可证',
+                product: '杭州龙井茶',
+                enterprise: '杭州西湖龙井茶业',
+                issuer: '浙江省市场监督管理局',
+                issueDate: '2024-12-01',
+                expiryDate: '2029-11-30',
+                certNumber: 'FPL-2024-ZJ-012',
+                status: '有效'
+            }
+        ];
+
+        let currentFilter = 'all';
+
+        function renderCertificates(filter = 'all') {
+            const grid = document.getElementById('certificatesGrid');
+            const filtered = filter === 'all' 
+                ? certificates 
+                : certificates.filter(c => c.type === filter);
+
+            grid.innerHTML = filtered.map(cert => `
+                <div class="certificate-card">
+                    <div class="certificate-header ${cert.typeClass}">
+                        <div class="certificate-badge">${cert.typeName}</div>
+                        <div class="certificate-icon">${cert.icon}</div>
+                        <div class="certificate-title">${cert.title}</div>
+                        <div class="certificate-id">${cert.id}</div>
+                    </div>
+                    <div class="certificate-body">
+                        <div class="certificate-info">
+                            <div class="info-row">
+                                <span class="info-label">产品名称</span>
+                                <span class="info-value">${cert.product}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">认证企业</span>
+                                <span class="info-value">${cert.enterprise}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">颁发机构</span>
+                                <span class="info-value">${cert.issuer}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">证书编号</span>
+                                <span class="info-value">${cert.certNumber}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">颁发日期</span>
+                                <span class="info-value">${cert.issueDate}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">有效期至</span>
+                                <span class="info-value">${cert.expiryDate}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">证书状态</span>
+                                <span class="info-value" style="color: #67c23a;">${cert.status}</span>
+                            </div>
+                        </div>
+                        <div class="certificate-qr">
+                            <div class="qr-code">📱</div>
+                            <div class="qr-hint">扫码查看证书详情</div>
+                        </div>
+                        <div class="certificate-actions">
+                            <button class="cert-btn" onclick="viewCertificate('${cert.id}')">查看详情</button>
+                            <button class="cert-btn primary" onclick="downloadCertificate('${cert.id}')">下载证书</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCertificates(type) {
+            currentFilter = type;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.filter-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 渲染证书
+            renderCertificates(type);
+        }
+
+        function viewCertificate(id) {
+            const cert = certificates.find(c => c.id === id);
+            alert(`证书详情\n\n证书编号：${cert.certNumber}\n产品名称：${cert.product}\n认证企业：${cert.enterprise}\n颁发机构：${cert.issuer}\n颁发日期：${cert.issueDate}\n有效期至：${cert.expiryDate}\n状态：${cert.status}`);
+        }
+
+        function downloadCertificate(id) {
+            const cert = certificates.find(c => c.id === id);
+            alert(`正在下载证书：${cert.title}\n证书编号：${cert.certNumber}`);
+        }
+
+        // 初始化页面
+        renderCertificates();
+    </script>
+</body>
+
+</html>

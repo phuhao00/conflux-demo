@@ -92,13 +92,16 @@ func GetMobileProducts(c *gin.Context) {
 	var mobileData []gin.H
 	for _, item := range products {
 		mobileData = append(mobileData, gin.H{
-			"id":         item.ID,
-			"name":       item.Name,
-			"yield_rate": item.YieldRate,
-			"price":      item.Price,
-			"duration":   item.Duration,
-			"risk":       item.RiskLevel, // Mobile expects "risk", Go has "RiskLevel"
-			"icon":       item.Icon,
+			"id":           item.ID,
+			"name":         item.Name,
+			"yield_rate":   item.YieldRate,
+			"price":        item.Price,
+			"duration":     item.Duration,
+			"risk":         item.RiskLevel, // Mobile expects "risk", Go has "RiskLevel"
+			"icon":         item.Icon,
+			"product_type": item.ProductType,
+			"category":     item.Category,
+			"stock":        item.Stock,
 		})
 	}
 

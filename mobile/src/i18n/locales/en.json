@@ -23,14 +23,18 @@
     "ago": "ago"
   },
   "product": {
-    "title": "Digital Assets",
+    "title": "Digital Products",
     "expectedYield": "Exp. Yield",
     "duration": "Duration",
     "minInvest": "Min. Invest",
     "investNow": "Invest Now",
-    "low": "Low Risk",
-    "medium": "Medium Risk",
-    "high": "High Risk"
+    "purchaseNow": "Purchase Now",
+    "price": "Price",
+    "stock": "Stock",
+    "category": "Category",
+    "low": "Popular",
+    "medium": "Limited",
+    "high": "Exclusive"
   },
   "profile": {
     "title": "Me",

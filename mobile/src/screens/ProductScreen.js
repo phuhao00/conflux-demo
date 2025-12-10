@@ -37,18 +37,18 @@ const ProductScreen = () => {
         return <Ionicons name="musical-notes" {...iconProps} />;
       case 'color-palette':
         return <Ionicons name="color-palette" {...iconProps} />;
-      case 'cube':
-        return <Ionicons name="cube" {...iconProps} />;
-      case 'nutrition':
-        return <Ionicons name="nutrition" {...iconProps} />;
-      case 'barley':
-        return <MaterialCommunityIcons name="barley" {...iconProps} />;
-      case 'greenhouse':
-        return <MaterialCommunityIcons name="greenhouse" {...iconProps} />;
-      case 'cow':
-        return <MaterialCommunityIcons name="cow" {...iconProps} />;
-      case 'sprout':
-        return <MaterialCommunityIcons name="sprout" {...iconProps} />;
+      case 'game-controller':
+        return <Ionicons name="game-controller" {...iconProps} />;
+      case 'videocam':
+        return <Ionicons name="videocam" {...iconProps} />;
+      case 'book':
+        return <Ionicons name="book" {...iconProps} />;
+      case 'image':
+        return <Ionicons name="image" {...iconProps} />;
+      case 'film':
+        return <Ionicons name="film" {...iconProps} />;
+      case 'headset':
+        return <Ionicons name="headset" {...iconProps} />;
       default:
         return <Ionicons name="cube-outline" {...iconProps} />;
     }
@@ -104,12 +104,12 @@ const ProductScreen = () => {
         // Then show success message
         setTimeout(() => {
           Alert.alert(
-            'Success!',
-            `Investment of ¥${totalAmount.toFixed(2)} recorded successfully!\n\nYou can view your assets in Profile → My Assets & Transactions`
+            'Purchase Successful!',
+            `You have successfully purchased ${selectedProduct.name} for ¥${totalAmount.toFixed(2)}!\n\nYou can view your digital assets in Profile → My Assets & Transactions`
           );
         }, 300);
       } else {
-        Alert.alert('Error', res.error || 'Investment failed');
+        Alert.alert('Error', res.error || 'Purchase failed');
       }
     } catch (e) {
       console.error(e);
@@ -136,25 +136,25 @@ const ProductScreen = () => {
 
       <View style={styles.cardBody}>
         <View style={styles.infoItem}>
-          <Ionicons name="trending-up" size={20} color="#d81e06" />
-          <Text style={styles.yieldValue}>{item.yield_rate}</Text>
-          <Text style={styles.infoLabel}>{t('product.expectedYield')}</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Ionicons name="time-outline" size={20} color="#666" />
-          <Text style={styles.infoValue}>{item.duration}</Text>
-          <Text style={styles.infoLabel}>{t('product.duration')}</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Ionicons name="wallet-outline" size={20} color="#666" />
+          <Ionicons name="pricetag" size={20} color="#d81e06" />
           <Text style={styles.priceValue}>{item.price}</Text>
-          <Text style={styles.infoLabel}>{t('product.minInvest')}</Text>
+          <Text style={styles.infoLabel}>Price</Text>
+        </View>
+        <View style={styles.infoItem}>
+          <Ionicons name="cube-outline" size={20} color="#666" />
+          <Text style={styles.infoValue}>{item.stock || 'Unlimited'}</Text>
+          <Text style={styles.infoLabel}>Stock</Text>
+        </View>
+        <View style={styles.infoItem}>
+          <Ionicons name="layers-outline" size={20} color="#666" />
+          <Text style={styles.infoValue}>{item.category || 'Digital'}</Text>
+          <Text style={styles.infoLabel}>Category</Text>
         </View>
       </View>
 
       <TouchableOpacity style={styles.investButton} onPress={() => handleInvestPress(item)}>
-        <Ionicons name="arrow-forward-circle" size={20} color="#fff" style={styles.buttonIcon} />
-        <Text style={styles.investButtonText}>{t('product.investNow')}</Text>
+        <Ionicons name="cart" size={20} color="#fff" style={styles.buttonIcon} />
+        <Text style={styles.investButtonText}>Purchase Now</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -164,7 +164,7 @@ const ProductScreen = () => {
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>{t('product.title')}</Text>
-          <Text style={styles.headerSubtitle}>NFT & Digital Collectibles</Text>
+          <Text style={styles.headerSubtitle}>Digital Assets & NFTs</Text>
         </View>
         <TouchableOpacity style={styles.filterButton} onPress={loadData}>
           <Ionicons name="filter" size={24} color="#d81e06" />
@@ -184,20 +184,23 @@ const ProductScreen = () => {
         />
       )}
 
-      {/* Invest Modal */}
+      {/* Purchase Modal */}
       {selectedProduct && (
         <View style={[styles.modalOverlay, !showInvest && { display: 'none' }]}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Invest in {selectedProduct.name}</Text>
-            <Text style={styles.modalSubtitle}>Expected Yield: {selectedProduct.yield_rate}</Text>
-            <Text style={styles.modalPrice}>Min Investment: {selectedProduct.price}</Text>
+            <Text style={styles.modalTitle}>Purchase {selectedProduct.name}</Text>
+            <Text style={styles.modalSubtitle}>Category: {selectedProduct.category || 'Digital Asset'}</Text>
+            <Text style={styles.modalPrice}>Price: {selectedProduct.price}</Text>
+            {selectedProduct.stock && (
+              <Text style={styles.modalStock}>Available: {selectedProduct.stock} units</Text>
+            )}
 
             <View style={styles.modalButtons}>
               <TouchableOpacity style={[styles.modalBtn, styles.cancelBtn]} onPress={() => setShowInvest(false)}>
                 <Text style={styles.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.modalBtn, styles.confirmBtn]} onPress={handleInvestConfirm}>
-                <Text style={styles.confirmBtnText}>Confirm Invest</Text>
+                <Text style={styles.confirmBtnText}>Confirm Purchase</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -368,6 +371,11 @@ const styles = StyleSheet.create({
   modalPrice: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 8,
+  },
+  modalStock: {
+    fontSize: 13,
+    color: '#999',
     marginBottom: 24,
   },
   modalButtons: {

@@ -63,6 +63,9 @@ type Product struct {
 	Price           string    `gorm:"size:50" json:"price"`
 	Duration        string    `gorm:"size:50" json:"duration"`
 	RiskLevel       string    `gorm:"size:20" json:"risk_level"` // "low", "medium", "high"
+	ProductType     string    `gorm:"size:20;default:'digital'" json:"product_type"` // "digital", "physical"
+	Category        string    `gorm:"size:50" json:"category"` // "music", "art", "game", "video", etc.
+	Stock           int       `gorm:"default:0" json:"stock"` // Available quantity for digital goods
 	ContractAddress string    `gorm:"size:42" json:"contract_address"`
 	CreatedAt       time.Time `json:"created_at"`
 }

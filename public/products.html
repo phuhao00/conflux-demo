@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品种类 - Conflux Farm</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .product-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e8f5e9;
+            color: #4caf50;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .product-desc {
+            color: #5a6c7d;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .product-stats {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid #e8ecf1;
+        }
+
+        .product-stat {
+            text-align: center;
+        }
+
+        .product-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #7c8ff5;
+        }
+
+        .product-stat-label {
+            font-size: 12px;
+            color: #8492a6;
+            margin-top: 4px;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #dcdfe6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            border-color: #7c8ff5;
+            color: #7c8ff5;
+        }
+
+        .filter-btn.active {
+            background: #7c8ff5;
+            color: white;
+            border-color: #7c8ff5;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <div class="logo-icon">🌾</div>
+                <span>Conflux Farm</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="products.html" class="active">产品种类</a></li>
+                <li><a href="#certificates">数字证书</a></li>
+                <li><a href="#traceability">溯源管理</a></li>
+                <li><a href="operations.html">我的</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="page-container">
+            <h1 class="page-title">产品种类</h1>
+            <p class="page-subtitle">浏览平台上的各类农产品</p>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-container">
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+            <span class="filter-label">分类筛选：</span>
+            <button class="filter-btn active" onclick="filterProducts('all')">全部</button>
+            <button class="filter-btn" onclick="filterProducts('grain')">粮食作物</button>
+            <button class="filter-btn" onclick="filterProducts('vegetable')">蔬菜</button>
+            <button class="filter-btn" onclick="filterProducts('fruit')">水果</button>
+            <button class="filter-btn" onclick="filterProducts('tea')">茶叶</button>
+            <button class="filter-btn" onclick="filterProducts('other')">其他</button>
+        </div>
+
+        <!-- 产品网格 -->
+        <div class="products-grid" id="productsGrid">
+            <!-- 产品卡片将通过 JavaScript 动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            {
+                id: 1,
+                name: '有机大米',
+                category: 'grain',
+                categoryName: '粮食作物',
+                icon: '🌾',
+                desc: '来自黑龙江五常的优质有机大米，无农药无化肥，口感香甜软糯',
+                batches: 1250,
+                enterprises: 45,
+                color: '#FFD700'
+            },
+            {
+                id: 2,
+                name: '普洱茶',
+                category: 'tea',
+                categoryName: '茶叶',
+                icon: '🍵',
+                desc: '云南普洱古树茶，经过传统工艺发酵，茶香浓郁，回甘持久',
+                batches: 856,
+                enterprises: 32,
+                color: '#8B4513'
+            },
+            {
+                id: 3,
+                name: '新鲜蔬菜',
+                category: 'vegetable',
+                categoryName: '蔬菜',
+                icon: '🥬',
+                desc: '山东寿光大棚蔬菜，新鲜采摘，绿色健康，当日配送',
+                batches: 2340,
+                enterprises: 78,
+                color: '#32CD32'
+            },
+            {
+                id: 4,
+                name: '苹果',
+                category: 'fruit',
+                categoryName: '水果',
+                icon: '🍎',
+                desc: '陕西洛川红富士苹果，果形端正，色泽鲜艳，脆甜多汁',
+                batches: 1680,
+                enterprises: 56,
+                color: '#FF4500'
+            },
+            {
+                id: 5,
+                name: '小麦',
+                category: 'grain',
+                categoryName: '粮食作物',
+                icon: '🌾',
+                desc: '河南优质小麦，籽粒饱满，蛋白质含量高，适合制作面粉',
+                batches: 980,
+                enterprises: 38,
+                color: '#DAA520'
+            },
+            {
+                id: 6,
+                name: '龙井茶',
+                category: 'tea',
+                categoryName: '茶叶',
+                icon: '🍃',
+                desc: '杭州西湖龙井，明前采摘，色泽翠绿，香气清高，味道甘醇',
+                batches: 645,
+                enterprises: 28,
+                color: '#90EE90'
+            },
+            {
+                id: 7,
+                name: '西红柿',
+                category: 'vegetable',
+                categoryName: '蔬菜',
+                icon: '🍅',
+                desc: '新疆番茄，日照充足，糖分高，口感酸甜适中',
+                batches: 1420,
+                enterprises: 52,
+                color: '#FF6347'
+            },
+            {
+                id: 8,
+                name: '橙子',
+                category: 'fruit',
+                categoryName: '水果',
+                icon: '🍊',
+                desc: '江西赣南脐橙，果肉细嫩，汁多味甜，维生素C含量丰富',
+                batches: 1890,
+                enterprises: 64,
+                color: '#FFA500'
+            },
+            {
+                id: 9,
+                name: '玉米',
+                category: 'grain',
+                categoryName: '粮食作物',
+                icon: '🌽',
+                desc: '吉林甜玉米，颗粒饱满，口感香甜，营养价值高',
+                batches: 1120,
+                enterprises: 42,
+                color: '#FFD700'
+            },
+            {
+                id: 10,
+                name: '铁观音',
+                category: 'tea',
+                categoryName: '茶叶',
+                icon: '🍵',
+                desc: '福建安溪铁观音，兰花香浓郁，滋味醇厚，回甘明显',
+                batches: 720,
+                enterprises: 30,
+                color: '#556B2F'
+            },
+            {
+                id: 11,
+                name: '黄瓜',
+                category: 'vegetable',
+                categoryName: '蔬菜',
+                icon: '🥒',
+                desc: '有机黄瓜，清脆爽口，水分充足，适合生食或凉拌',
+                batches: 1560,
+                enterprises: 48,
+                color: '#228B22'
+            },
+            {
+                id: 12,
+                name: '草莓',
+                category: 'fruit',
+                categoryName: '水果',
+                icon: '🍓',
+                desc: '大棚草莓，果实鲜红，香气浓郁，甜度高，口感细腻',
+                batches: 980,
+                enterprises: 36,
+                color: '#DC143C'
+            }
+        ];
+
+        let currentFilter = 'all';
+
+        function renderProducts(filter = 'all') {
+            const grid = document.getElementById('productsGrid');
+            const filteredProducts = filter === 'all' 
+                ? products 
+                : products.filter(p => p.category === filter);
+
+            grid.innerHTML = filteredProducts.map(product => `
+                <div class="product-card" onclick="viewProduct(${product.id})">
+                    <div class="product-image" style="background: linear-gradient(135deg, ${product.color}dd 0%, ${product.color}88 100%);">
+                        ${product.icon}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <span class="product-category">${product.categoryName}</span>
+                        <div class="product-desc">${product.desc}</div>
+                        <div class="product-stats">
+                            <div class="product-stat">
+                                <div class="product-stat-value">${product.batches}</div>
+                                <div class="product-stat-label">溯源批次</div>
+                            </div>
+                            <div class="product-stat">
+                                <div class="product-stat-value">${product.enterprises}</div>
+                                <div class="product-stat-label">生产企业</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterProducts(category) {
+            currentFilter = category;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 渲染产品
+            renderProducts(category);
+        }
+
+        function viewProduct(id) {
+            const product = products.find(p => p.id === id);
+            alert(`查看产品详情：${product.name}\n\n${product.desc}\n\n溯源批次：${product.batches}\n生产企业：${product.enterprises}`);
+        }
+
+        // 初始化页面
+        renderProducts();
+    </script>
+</body>
+
+</html>

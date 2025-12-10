@@ -51,9 +51,12 @@ func main() {
 
 	// Seed products (Digital Assets)
 	products := []models.Product{
-		{Name: "Premium Music NFT Collection", Icon: "musical-notes", YieldRate: "8.5%", Price: "¥500", Duration: "12 Months", RiskLevel: "low"},
-		{Name: "Digital Art Investment Fund", Icon: "color-palette", YieldRate: "6.2%", Price: "¥100", Duration: "6 Months", RiskLevel: "low"},
-		{Name: "Metaverse Real Estate Token", Icon: "cube", YieldRate: "12.4%", Price: "¥1000", Duration: "24 Months", RiskLevel: "medium"},
+		{Name: "Premium Music Album NFT", Icon: "musical-notes", YieldRate: "Limited Edition", Price: "¥299", Duration: "Permanent", RiskLevel: "low", ProductType: "digital", Category: "Music", Stock: 100},
+		{Name: "Digital Art Collection", Icon: "color-palette", YieldRate: "Exclusive", Price: "¥599", Duration: "Permanent", RiskLevel: "low", ProductType: "digital", Category: "Art", Stock: 50},
+		{Name: "Game Asset Bundle", Icon: "game-controller", YieldRate: "Rare Items", Price: "¥199", Duration: "Permanent", RiskLevel: "medium", ProductType: "digital", Category: "Gaming", Stock: 200},
+		{Name: "Video Course Collection", Icon: "videocam", YieldRate: "Full Access", Price: "¥399", Duration: "Lifetime", RiskLevel: "low", ProductType: "digital", Category: "Education", Stock: 0},
+		{Name: "E-Book Bundle", Icon: "book", YieldRate: "Complete Series", Price: "¥149", Duration: "Permanent", RiskLevel: "low", ProductType: "digital", Category: "Books", Stock: 0},
+		{Name: "Photography Pack", Icon: "image", YieldRate: "HD Quality", Price: "¥249", Duration: "Permanent", RiskLevel: "low", ProductType: "digital", Category: "Photography", Stock: 150},
 	}
 	for _, p := range products {
 		db.FirstOrCreate(&p, models.Product{Name: p.Name})

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的操作 - Conflux Farm</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast">
+        <button class="toast-close" onclick="hideToast()">×</button>
+        <div class="toast-header" id="toastHeader"></div>
+        <div class="toast-body" id="toastBody"></div>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <div class="logo-icon">🌾</div>
+                <span>Conflux Farm</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="#products">产品种类</a></li>
+                <li><a href="#certificates">数字证书</a></li>
+                <li><a href="#traceability">溯源管理</a></li>
+                <li><a href="operations.html" class="active">我的</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="page-container">
+            <h1 class="page-title">我的操作</h1>
+            <p class="page-subtitle">管理您的企业账户和产品批次</p>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-container">
+        <!-- 充值服务费 -->
+        <div class="action-panel">
+            <div class="panel-title">💰 充值服务费</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>企业账户</label>
+                    <input type="text" id="topupAddress" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
+                </div>
+                <div class="form-group">
+                    <label>金额 (RMB)</label>
+                    <input type="number" id="topupAmount" placeholder="100">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" onclick="topup()">充值</button>
+            </div>
+        </div>
+
+        <!-- 查询余额 -->
+        <div class="action-panel">
+            <div class="panel-title">💳 查询账户余额</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>企业账户</label>
+                    <input type="text" id="balanceAddress" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" onclick="getBalance()">查询余额</button>
+            </div>
+        </div>
+
+        <!-- 登记产品批次 -->
+        <div class="action-panel">
+            <div class="panel-title">📝 登记产品批次</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>扣费企业账户</label>
+                    <input type="text" id="mintFrom" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
+                </div>
+                <div class="form-group">
+                    <label>接收企业账户</label>
+                    <input type="text" id="mintTo" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
+                </div>
+                <div class="form-group">
+                    <label>产品证书合约</label>
+                    <input type="text" id="nftAddress" value="0x5D96E3BDC05Bc48D6bae1A38B0f6Bdf86C47e13d">
+                </div>
+                <div class="form-group">
+                    <label>批次编号</label>
+                    <input type="number" id="tokenId" placeholder="1">
+                </div>
+                <div class="form-group">
+                    <label>产地</label>
+                    <input type="text" id="origin" placeholder="云南普洱">
+                </div>
+                <div class="form-group">
+                    <label>采收时间 (Unix秒)</label>
+                    <input type="number" id="harvestTime">
+                </div>
+                <div class="form-group">
+                    <label>质检编号</label>
+                    <input type="text" id="inspectionId" placeholder="QC20240101">
+                </div>
+                <div class="form-group">
+                    <label>证书链接 (可选)</label>
+                    <input type="text" id="uri" placeholder="留空则自动生成">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" onclick="mintNFT()">登记批次</button>
+            </div>
+        </div>
+
+        <!-- 转移产品批次 -->
+        <div class="action-panel">
+            <div class="panel-title">🔄 转移产品批次</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>转出企业账户</label>
+                    <input type="text" id="transferFrom" placeholder="0x...">
+                </div>
+                <div class="form-group">
+                    <label>接收企业账户</label>
+                    <input type="text" id="transferTo" placeholder="0x...">
+                </div>
+                <div class="form-group">
+                    <label>产品证书合约</label>
+                    <input type="text" id="transferNftAddress" placeholder="0x...">
+                </div>
+                <div class="form-group">
+                    <label>批次编号</label>
+                    <input type="number" id="transferTokenId" placeholder="1">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" onclick="transferNFT()">转移批次</button>
+            </div>
+        </div>
+
+        <!-- 查询批次详情 -->
+        <div class="action-panel">
+            <div class="panel-title">🔍 查询批次溯源详情</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>产品证书合约</label>
+                    <input type="text" id="detailsNftAddress" placeholder="0x...">
+                </div>
+                <div class="form-group">
+                    <label>批次编号</label>
+                    <input type="number" id="detailsTokenId" placeholder="1">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" onclick="getBatchDetails()">查询详情</button>
+            </div>
+        </div>
+
+        <!-- 结果显示 -->
+        <div class="action-panel">
+            <div class="panel-title">📋 操作结果</div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">处理中...</p>
+            </div>
+            <div class="result" id="result">
+                <p style="color: #8492a6;">结果将显示在这里...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="operations.js"></script>
+</body>
+
+</html>

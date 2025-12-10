@@ -23,14 +23,18 @@
     "ago": "前"
   },
   "product": {
-    "title": "数字资产",
+    "title": "数字商品",
     "expectedYield": "预期收益",
     "duration": "期限",
     "minInvest": "最低投资",
     "investNow": "立即投资",
-    "low": "低风险",
-    "medium": "中风险",
-    "high": "高风险"
+    "purchaseNow": "立即购买",
+    "price": "价格",
+    "stock": "库存",
+    "category": "分类",
+    "low": "热门",
+    "medium": "限量",
+    "high": "独家"
   },
   "profile": {
     "title": "我的",

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conflux Farm - 农产品链上资产管理</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -14,108 +15,411 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f7fa;
             min-height: 100vh;
-            padding: 20px;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        /* 顶部导航栏 */
+        .navbar {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #7c8ff5 0%, #9b7fd9 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            padding: 30px;
+            font-size: 20px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #5a6c7d;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: #7c8ff5;
+            border-bottom-color: #7c8ff5;
+        }
+
+        /* 搜索栏 */
+        .search-section {
+            background: linear-gradient(135deg, #7c8ff5 0%, #9b7fd9 100%);
+            padding: 60px 40px;
+            color: white;
+        }
+
+        .search-container {
+            max-width: 1400px;
+            margin: 0 auto;
             text-align: center;
         }
 
-        .header h1 {
-            font-size: 2.5em;
+        .search-title {
+            font-size: 32px;
+            font-weight: 700;
             margin-bottom: 10px;
         }
 
-        .header p {
-            font-size: 1.1em;
+        .search-subtitle {
+            font-size: 16px;
             opacity: 0.9;
+            margin-bottom: 30px;
         }
 
-        .content {
-            padding: 30px;
+        .search-box {
+            display: flex;
+            gap: 12px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        .section {
+        .search-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-btn {
+            padding: 16px 40px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-btn:hover {
+            background: #34495e;
+            transform: translateY(-1px);
+        }
+
+        /* 主容器 */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* 统计卡片区域 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
             margin-bottom: 40px;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            border-left: 5px solid #667eea;
         }
 
-        .section h2 {
-            color: #667eea;
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            color: #8492a6;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .stat-change {
+            font-size: 13px;
+            color: #67c23a;
+        }
+
+        .stat-change.negative {
+            color: #f56c6c;
+        }
+
+        /* 图表区域 */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            font-size: 1.8em;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .chart-link {
+            color: #7c8ff5;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .chart-link:hover {
+            text-decoration: underline;
+        }
+
+        .chart-placeholder {
+            height: 250px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8492a6;
+        }
+
+        /* 表格区域 */
+        .table-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 40px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .table-tabs {
+            display: flex;
+            gap: 20px;
+            border-bottom: 2px solid #e8ecf1;
+            margin-bottom: 20px;
+        }
+
+        .table-tab {
+            padding: 12px 0;
+            color: #8492a6;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .table-tab.active {
+            color: #7c8ff5;
+            border-bottom-color: #7c8ff5;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f5f7fa;
+        }
+
+        th {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #5a6c7d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e8ecf1;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .hash-link {
+            color: #7c8ff5;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+        }
+
+        .hash-link:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .badge-pending {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .age {
+            color: #8492a6;
+            font-size: 13px;
+        }
+
+        /* 操作面板 */
+        .action-panel {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8ecf1;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
         }
 
         .form-group label {
-            display: block;
-            margin-bottom: 5px;
+            font-size: 13px;
             font-weight: 600;
-            color: #333;
+            color: #5a6c7d;
+            margin-bottom: 8px;
         }
 
         .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 12px 16px;
+            border: 1px solid #dcdfe6;
+            border-radius: 6px;
             font-size: 14px;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #7c8ff5;
+            box-shadow: 0 0 0 3px rgba(124, 143, 245, 0.1);
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 24px;
+            background: #7c8ff5;
             color: white;
-            padding: 12px 30px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 6px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-right: 10px;
-            margin-top: 10px;
+            transition: all 0.2s;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: #6a7ee3;
+            transform: translateY(-1px);
         }
 
         .btn:active {
             transform: translateY(0);
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         /* Toast 提示 */
@@ -242,17 +546,25 @@
 
         .result {
             margin-top: 20px;
-            padding: 15px;
-            background: white;
+            padding: 20px;
+            background: #f5f7fa;
             border-radius: 8px;
-            border: 2px solid #e0e0e0;
-            max-height: 300px;
+            border: 1px solid #dcdfe6;
+            max-height: 400px;
             overflow-y: auto;
         }
 
         .result h3 {
-            color: #667eea;
-            margin-bottom: 10px;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .result h3.success {
+            color: #67c23a;
+        }
+
+        .result h3.error {
+            color: #f56c6c;
         }
 
         .result pre {
@@ -260,17 +572,45 @@
             word-wrap: break-word;
             font-family: 'Courier New', monospace;
             font-size: 13px;
-            color: #333;
+            color: #2c3e50;
+            line-height: 1.6;
         }
 
-        .success {
-            color: #28a745;
-            font-weight: 600;
-        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navbar-content {
+                flex-direction: column;
+                height: auto;
+                padding: 20px 0;
+            }
 
-        .error {
-            color: #dc3545;
-            font-weight: 600;
+            .nav-menu {
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .stats-grid,
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-container {
+                padding: 20px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th,
+            td {
+                padding: 10px 8px;
+            }
         }
     </style>
 </head>
@@ -283,320 +623,294 @@
         <div class="toast-body" id="toastBody"></div>
     </div>
 
-    <div class="container">
-        <div class="header">
-            <h1>🌾 Conflux Farm</h1>
-            <p>农产品链上资产与人民币Gas代付示例</p>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <div class="logo-icon">🌾</div>
+                <span>Conflux Farm</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active" id="nav-home">首页</a></li>
+                <li><a href="products.html">产品种类</a></li>
+                <li><a href="certificates.html">数字证书</a></li>
+                <li><a href="traceability.html">溯源管理</a></li>
+                <li><a href="operations.html" id="nav-operations">我的</a></li>
+            </ul>
         </div>
+    </nav>
 
-        <div class="content">
-            <!-- 充值人民币 -->
-            <div class="section">
-                <h2>💰 充值人民币</h2>
-                <div class="form-group">
-                    <label>地址</label>
-                    <input type="text" id="topupAddress" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
-                </div>
-                <div class="form-group">
-                    <label>金额 (RMB)</label>
-                    <input type="number" id="topupAmount" placeholder="100">
-                </div>
-                <button class="btn" onclick="topup()">充值</button>
-            </div>
-
-            <!-- 查询余额 -->
-            <div class="section">
-                <h2>💳 查询余额</h2>
-                <div class="form-group">
-                    <label>地址</label>
-                    <input type="text" id="balanceAddress" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
-                </div>
-                <button class="btn" onclick="getBalance()">查询余额</button>
-            </div>
-
-            <!-- 铸造批次 NFT -->
-            <div class="section">
-                <h2>🎨 铸造批次 NFT</h2>
-                <div class="grid">
-                    <div class="form-group">
-                        <label>扣费地址</label>
-                        <input type="text" id="mintFrom" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
-                    </div>
-                    <div class="form-group">
-                        <label>接收地址</label>
-                        <input type="text" id="mintTo" value="0xfB11f0cFE930B10696208d52e4AF121507B57B00">
-                    </div>
-                    <div class="form-group">
-                        <label>NFT 合约地址</label>
-                        <input type="text" id="nftAddress" value="0x5D96E3BDC05Bc48D6bae1A38B0f6Bdf86C47e13d">
-                    </div>
-                    <div class="form-group">
-                        <label>Token ID</label>
-                        <input type="number" id="tokenId" placeholder="1">
-                    </div>
-                    <div class="form-group">
-                        <label>产地</label>
-                        <input type="text" id="origin" placeholder="云南普洱">
-                    </div>
-                    <div class="form-group">
-                        <label>采收时间 (Unix秒)</label>
-                        <input type="number" id="harvestTime">
-                    </div>
-                    <div class="form-group">
-                        <label>质检编号</label>
-                        <input type="text" id="inspectionId" placeholder="QC20240101">
-                    </div>
-                    <div class="form-group">
-                        <label>URI (可选)</label>
-                        <input type="text" id="uri" placeholder="留空则自动生成">
-                    </div>
-                </div>
-                <button class="btn" onclick="mintNFT()">铸造 NFT</button>
-            </div>
-
-            <!-- 转移批次 NFT -->
-            <div class="section">
-                <h2>🔄 转移批次 NFT</h2>
-                <div class="grid">
-                    <div class="form-group">
-                        <label>扣费地址 (From)</label>
-                        <input type="text" id="transferFrom" placeholder="0x...">
-                    </div>
-                    <div class="form-group">
-                        <label>接收地址 (To)</label>
-                        <input type="text" id="transferTo" placeholder="0x...">
-                    </div>
-                    <div class="form-group">
-                        <label>NFT 合约地址</label>
-                        <input type="text" id="transferNftAddress" placeholder="0x...">
-                    </div>
-                    <div class="form-group">
-                        <label>Token ID</label>
-                        <input type="number" id="transferTokenId" placeholder="1">
-                    </div>
-                </div>
-                <button class="btn" onclick="transferNFT()">转移 NFT</button>
-            </div>
-
-            <!-- 查询批次详情 -->
-            <div class="section">
-                <h2>🔍 查询批次详情</h2>
-                <div class="grid">
-                    <div class="form-group">
-                        <label>NFT 合约地址</label>
-                        <input type="text" id="detailsNftAddress" placeholder="0x...">
-                    </div>
-                    <div class="form-group">
-                        <label>Token ID</label>
-                        <input type="number" id="detailsTokenId" placeholder="1">
-                    </div>
-                </div>
-                <button class="btn" onclick="getBatchDetails()">查询详情</button>
-            </div>
-
-            <!-- 结果显示 -->
-            <div class="section">
-                <h2>📋 操作结果</h2>
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <p style="margin-top: 10px;">处理中...</p>
-                </div>
-                <div class="result" id="result">
-                    <p style="color: #999;">结果将显示在这里...</p>
-                </div>
+    <!-- 搜索区域 -->
+    <div class="search-section">
+        <div class="search-container">
+            <h1 class="search-title">农产品链上资产管理平台</h1>
+            <p class="search-subtitle">基于 Conflux 的农产品溯源与人民币 Gas 代付系统</p>
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="搜索企业账户 / 批次编号 / 产品证书 / 溯源码">
+                <button class="search-btn">🔍 搜索</button>
             </div>
         </div>
     </div>
 
+    <!-- 主内容区域 -->
+    <div class="main-container">
+        <!-- 统计数据卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">产品种类总数</div>
+                <div class="stat-value" id="blockNumber">66</div>
+                <div class="stat-change">+3 本月新增</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">溯源批次总数</div>
+                <div class="stat-value" id="latestBlock">3,030,002</div>
+                <div class="stat-change">11 秒前更新</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">注册企业数量</div>
+                <div class="stat-value" id="accountCount">331,163</div>
+                <div class="stat-change">+45 今日新增</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">服务费用</div>
+                <div class="stat-value">0.00 元</div>
+                <div class="stat-change">政府补贴</div>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">溯源记录趋势</div>
+                    <a class="chart-link">查看详情 →</a>
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center; padding: 10px;">
+                    <canvas id="traceabilityChart" style="max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">企业注册增长</div>
+                    <a class="chart-link">查看详情 →</a>
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center; padding: 10px;">
+                    <canvas id="enterpriseChart" style="max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最新产品批次/溯源记录表格 -->
+        <div class="table-section">
+            <div class="table-tabs">
+                <div class="table-tab active">最新产品批次</div>
+                <div class="table-tab">最新溯源记录</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>批次编号</th>
+                        <th>产品种类</th>
+                        <th>溯源次数</th>
+                        <th>批次证书</th>
+                        <th>生产企业</th>
+                        <th>产地</th>
+                        <th>质检状态</th>
+                        <th>登记时间</th>
+                    </tr>
+                </thead>
+                <tbody id="blocksTable">
+                    <tr>
+                        <td>20241210001</td>
+                        <td><span class="badge badge-success">有机茶叶</span></td>
+                        <td>0</td>
+                        <td><a href="#" class="hash-link">0x9f8b8f790b...</a></td>
+                        <td><a href="#" class="hash-link">云南普洱茶业</a></td>
+                        <td>云南普洱</td>
+                        <td><span class="badge badge-success">已通过</span></td>
+                        <td class="age">11 秒前</td>
+                    </tr>
+                    <tr>
+                        <td>20241210002</td>
+                        <td><span class="badge badge-success">有机大米</span></td>
+                        <td>1</td>
+                        <td><a href="#" class="hash-link">0x3a97f8b762...</a></td>
+                        <td><a href="#" class="hash-link">东北粮食集团</a></td>
+                        <td>黑龙江五常</td>
+                        <td><span class="badge badge-success">已通过</span></td>
+                        <td class="age">13 秒前</td>
+                    </tr>
+                    <tr>
+                        <td>20241210003</td>
+                        <td><span class="badge badge-success">新鲜蔬菜</span></td>
+                        <td>2</td>
+                        <td><a href="#" class="hash-link">0x1b6d3ae45c...</a></td>
+                        <td><a href="#" class="hash-link">山东寿光农业</a></td>
+                        <td>山东寿光</td>
+                        <td><span class="badge badge-pending">检测中</span></td>
+                        <td class="age">25 秒前</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="text-align: center; margin-top: 20px;">
+                <a class="chart-link">查看所有产品批次 →</a>
+            </div>
+        </div>
+
+    </div>
+
     <script>
-        const API_BASE = window.location.origin;
-        let toastTimeout;
-
-        function showToast(title, message, isSuccess = true) {
-            const toast = document.getElementById('toast');
-            const header = document.getElementById('toastHeader');
-            const body = document.getElementById('toastBody');
-
-            if (toastTimeout) clearTimeout(toastTimeout);
-
-            header.textContent = title;
-            header.className = `toast-header ${isSuccess ? 'success' : 'error'}`;
-            body.textContent = message;
-            toast.className = `toast ${isSuccess ? 'success' : 'error'} show`;
-
-            toastTimeout = setTimeout(() => {
-                hideToast();
-            }, 3000);
-        }
-
-        function hideToast() {
-            const toast = document.getElementById('toast');
-            toast.classList.add('hiding');
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 300);
-        }
-
-        function showLoading() {
-            document.getElementById('loading').classList.add('active');
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').classList.remove('active');
-        }
-
-        function showResult(data, isError = false) {
-            hideLoading();
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `
-                <h3 class="${isError ? 'error' : 'success'}">${isError ? '❌ 错误' : '✅ 成功'}</h3>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
-            `;
-        }
-
-        async function apiCall(endpoint, method = 'GET', body = null) {
-            showLoading();
-            try {
-                const options = {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
-                if (body) {
-                    options.body = JSON.stringify(body);
-                }
-                const response = await fetch(API_BASE + endpoint, options);
-                const data = await response.json();
-
-                showResult(data, !response.ok);
-
-                if (!response.ok) {
-                    const errorMsg = data.details ? `${data.error}: ${data.details}` : (data.error || '请求失败');
-                    showToast('❌ 操作失败', errorMsg, false);
-                }
-
-                return { ok: response.ok, data };
-            } catch (error) {
-                showResult({ error: error.message }, true);
-                showToast('❌ 网络错误', error.message, false);
-                return { ok: false, data: null };
-            }
-        }
-
-        async function topup() {
-            const address = document.getElementById('topupAddress').value.trim();
-            const rmbStr = document.getElementById('topupAmount').value.trim();
-
-            if (!address || !rmbStr) {
-                showToast('❌ 输入错误', '请填写完整信息', false);
-                return;
-            }
-
-            const rmb = parseFloat(rmbStr);
-            const result = await apiCall('/topup', 'POST', { address, rmb });
-            if (result.ok && result.data) {
-                showToast('✅ 充值成功', `成功充值 ${rmb} RMB,当前余额: ${result.data.balance} RMB`, true);
-            }
-        }
-
-        async function getBalance() {
-            const address = document.getElementById('balanceAddress').value.trim();
-            if (!address) {
-                showToast('❌ 输入错误', '请填写地址', false);
-                return;
-            }
-            const result = await apiCall(`/balance/${address}`);
-            if (result.ok && result.data) {
-                showToast('✅ 查询成功', `账户余额: ${result.data.balance} RMB`, true);
-            }
-        }
-
-        async function mintNFT() {
-            const from = document.getElementById('mintFrom').value.trim();
-            const to = document.getElementById('mintTo').value.trim();
-            const nftAddress = document.getElementById('nftAddress').value.trim();
-            const tokenIdStr = document.getElementById('tokenId').value.trim();
-            const origin = document.getElementById('origin').value.trim();
-            const harvestTimeStr = document.getElementById('harvestTime').value.trim();
-            const inspectionId = document.getElementById('inspectionId').value.trim();
-            const uri = document.getElementById('uri').value.trim();
-
-            if (!from) { showToast('❌ 输入错误', '请填写扣费地址', false); return; }
-            if (!to) { showToast('❌ 输入错误', '请填写接收地址', false); return; }
-            if (!nftAddress) { showToast('❌ 输入错误', '请填写 NFT 合约地址', false); return; }
-            if (tokenIdStr === '') { showToast('❌ 输入错误', '请填写 Token ID', false); return; }
-            if (!origin) { showToast('❌ 输入错误', '请填写产地', false); return; }
-            if (!harvestTimeStr) { showToast('❌ 输入错误', '请填写采收时间', false); return; }
-            if (!inspectionId) { showToast('❌ 输入错误', '请填写质检编号', false); return; }
-
-            const tokenId = parseInt(tokenIdStr);
-            const harvestTime = parseInt(harvestTimeStr);
-
-            const result = await apiCall('/relay/nft/mint', 'POST', {
-                from, to, nftAddress, tokenId, origin, harvestTime, inspectionId, uri
-            });
-            if (result.ok) {
-                showToast('✅ 铸造成功', `NFT #${tokenId} 铸造成功!`, true);
-            }
-        }
-
-        async function transferNFT() {
-            const from = document.getElementById('transferFrom').value.trim();
-            const to = document.getElementById('transferTo').value.trim();
-            const nftAddress = document.getElementById('transferNftAddress').value.trim();
-            const tokenIdStr = document.getElementById('transferTokenId').value.trim();
-
-            if (!from || !to || !nftAddress || !tokenIdStr) {
-                showToast('❌ 输入错误', '请填写完整信息', false);
-                return;
-            }
-
-            const tokenId = parseInt(tokenIdStr);
-            const result = await apiCall('/relay/nft/transfer', 'POST', {
-                from, to, nftAddress, tokenId
-            });
-            if (result.ok) {
-                showToast('✅ 转移成功', `NFT #${tokenId} 转移成功!`, true);
-            }
-        }
-
-        async function getBatchDetails() {
-            const nftAddress = document.getElementById('detailsNftAddress').value.trim();
-            const tokenIdStr = document.getElementById('detailsTokenId').value.trim();
-
-            if (!nftAddress || !tokenIdStr) {
-                showToast('❌ 输入错误', '请填写完整信息', false);
-                return;
-            }
-
-            const tokenId = parseInt(tokenIdStr);
-            const result = await apiCall(`/nft/batch/${nftAddress}/${tokenId}/details`);
-            if (result.ok) {
-                showToast('✅ 查询成功', `成功获取 NFT #${tokenId} 的详细信息`, true);
-            }
-        }
-
-        // 设置默认采收时间为当前时间
-        document.getElementById('harvestTime').value = Math.floor(Date.now() / 1000);
-
-        async function loadDefaultAddress() {
-            try {
-                const r = await fetch(API_BASE + '/nft/default-address');
-                const j = await r.json();
-                if (j.ok && j.address) {
-                    const ids = ['nftAddress', 'transferNftAddress', 'detailsNftAddress'];
-                    ids.forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el && (!el.value || el.value.startsWith('0x5D96'))) {
-                            el.value = j.address;
+        // 初始化图表
+        function initCharts() {
+            console.log('开始初始化图表');
+            // 溯源记录趋势图表
+            const traceCtx = document.getElementById('traceabilityChart');
+            console.log('溯源记录图表元素:', traceCtx);
+            if (traceCtx) {
+                try {
+                    const chart1 = new Chart(traceCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['17 Nov', '', '', '24 Nov', '', '', '1 Dec', '', '', '8 Dec'],
+                            datasets: [{
+                                label: '每日溯源记录数量',
+                                data: [14000, 13500, 13000, 12000, 11500, 11000, 10000, 9500, 9000, 8000],
+                                borderColor: '#a8b5f5',
+                                backgroundColor: 'rgba(168, 181, 245, 0.05)',
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 0,
+                                borderWidth: 1.5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    enabled: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    ticks: {
+                                        callback: function (value) {
+                                            return value >= 1000 ? (value / 1000) + 'k' : value;
+                                        },
+                                        color: '#b0b8c8',
+                                        font: {
+                                            size: 11
+                                        }
+                                    },
+                                    grid: {
+                                        color: '#f0f2f5',
+                                        drawBorder: false
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: '#b0b8c8',
+                                        font: {
+                                            size: 11
+                                        }
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
                         }
                     });
+                    console.log('溯源记录图表创建成功');
+                } catch (error) {
+                    console.error('创建溯源记录图表失败:', error);
                 }
-            } catch (e) { }
+            } else {
+                console.error('找不到溯源记录图表元素');
+            }
+
+            // 企业注册增长图表
+            const enterpriseCtx = document.getElementById('enterpriseChart');
+            console.log('企业注册图表元素:', enterpriseCtx);
+            if (enterpriseCtx) {
+                try {
+                    const chart2 = new Chart(enterpriseCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['17 Nov', '', '', '24 Nov', '', '', '1 Dec', '', '', '8 Dec'],
+                            datasets: [{
+                                label: '新增企业账户趋势',
+                                data: [10, 25, 35, 30, 45, 55, 70, 60, 50, 30],
+                                borderColor: '#c5b3e6',
+                                backgroundColor: 'rgba(197, 179, 230, 0.05)',
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 0,
+                                borderWidth: 1.5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    enabled: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        color: '#b0b8c8',
+                                        font: {
+                                            size: 11
+                                        }
+                                    },
+                                    grid: {
+                                        color: '#f0f2f5',
+                                        drawBorder: false
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: '#b0b8c8',
+                                        font: {
+                                            size: 11
+                                        }
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    console.log('企业注册图表创建成功');
+                } catch (error) {
+                    console.error('创建企业注册图表失败:', error);
+                }
+            } else {
+                console.error('找不到企业注册图表元素');
+            }
         }
 
-        loadDefaultAddress();
+        // 页面加载完成后初始化图表
+        window.addEventListener('load', function () {
+            console.log('页面加载完成，开始初始化图表');
+            console.log('Chart.js 是否加载:', typeof Chart !== 'undefined');
+            if (typeof Chart !== 'undefined') {
+                initCharts();
+            } else {
+                console.error('Chart.js 未加载');
+            }
+        });
     </script>
 </body>
 
