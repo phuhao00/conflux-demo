@@ -1,17 +1,27 @@
-version: '3'
+version: '3.8'
+
 services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=root:password@tcp(mysql:3306)/conflux_farm?charset=utf8mb4&parseTime=True&loc=Local
+      - ENVIRONMENT=production
+    depends_on:
+      - mysql
+    volumes:
+      - ./public:/root/public
+
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: creaibo
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: conflux_farm
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
+
 volumes:
   mysql_data:

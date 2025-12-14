@@ -176,7 +176,7 @@
     </div>
 
     <script>
-        const products = [
+        let products = [
             {
                 id: 1,
                 name: '有机大米',
@@ -311,15 +311,186 @@
             }
         ];
 
+        // 从后端获取产品数据
+        async function loadProducts() {
+            try {
+                console.log('开始从 API 加载产品数据...');
+                const response = await fetch('/api/products');
+                console.log('API 响应状态:', response.status);
+                
+                const data = await response.json();
+                console.log('API 响应数据:', data);
+                
+                if (data.ok && data.products && data.products.length > 0) {
+                    // 使用后端数据，但确保字段名匹配
+                    const apiProducts = data.products.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        category: p.category,
+                        categoryName: p.categoryName || p.category_name,
+                        icon: p.icon,
+                        desc: p.description || p.desc,
+                        batches: p.batches,
+                        enterprises: p.enterprises,
+                        color: p.color
+                    }));
+                    
+                    // 替换产品数据
+                    products.length = 0;
+                    products.push(...apiProducts);
+                    
+                    console.log('从 API 加载了', products.length, '个产品');
+                    renderProducts();
+                } else {
+                    console.log('API 数据无效，使用本地数据');
+                }
+            } catch (error) {
+                console.error('API 加载失败:', error);
+                console.log('使用本地数据作为后备');
+            }
+        }
+            {
+                id: 2,
+                name: '普洱茶',
+                category: 'tea',
+                categoryName: '茶叶',
+                icon: '🍵',
+                desc: '云南普洱古树茶，经过传统工艺发酵，茶香浓郁，回甘持久',
+                batches: 856,
+                enterprises: 32,
+                color: '#8B4513'
+            },
+            {
+                id: 3,
+                name: '新鲜蔬菜',
+                category: 'vegetable',
+                categoryName: '蔬菜',
+                icon: '🥬',
+                desc: '山东寿光大棚蔬菜，新鲜采摘，绿色健康，当日配送',
+                batches: 2340,
+                enterprises: 78,
+                color: '#32CD32'
+            },
+            {
+                id: 4,
+                name: '苹果',
+                category: 'fruit',
+                categoryName: '水果',
+                icon: '🍎',
+                desc: '陕西洛川红富士苹果，果形端正，色泽鲜艳，脆甜多汁',
+                batches: 1680,
+                enterprises: 56,
+                color: '#FF4500'
+            },
+            {
+                id: 5,
+                name: '小麦',
+                category: 'grain',
+                categoryName: '粮食作物',
+                icon: '🌾',
+                desc: '河南优质小麦，籽粒饱满，蛋白质含量高，适合制作面粉',
+                batches: 980,
+                enterprises: 38,
+                color: '#DAA520'
+            },
+            {
+                id: 6,
+                name: '龙井茶',
+                category: 'tea',
+                categoryName: '茶叶',
+                icon: '🍃',
+                desc: '杭州西湖龙井，明前采摘，色泽翠绿，香气清高，味道甘醇',
+                batches: 645,
+                enterprises: 28,
+                color: '#90EE90'
+            },
+            {
+                id: 7,
+                name: '西红柿',
+                category: 'vegetable',
+                categoryName: '蔬菜',
+                icon: '🍅',
+                desc: '新疆番茄，日照充足，糖分高，口感酸甜适中',
+                batches: 1420,
+                enterprises: 52,
+                color: '#FF6347'
+            },
+            {
+                id: 8,
+                name: '橙子',
+                category: 'fruit',
+                categoryName: '水果',
+                icon: '🍊',
+                desc: '江西赣南脐橙，果肉细嫩，汁多味甜，维生素C含量丰富',
+                batches: 1890,
+                enterprises: 64,
+                color: '#FFA500'
+            },
+            {
+                id: 9,
+                name: '玉米',
+                category: 'grain',
+                categoryName: '粮食作物',
+                icon: '🌽',
+                desc: '吉林甜玉米，颗粒饱满，口感香甜，营养价值高',
+                batches: 1120,
+                enterprises: 42,
+                color: '#FFD700'
+            },
+            {
+                id: 10,
+                name: '铁观音',
+                category: 'tea',
+                categoryName: '茶叶',
+                icon: '🍵',
+                desc: '福建安溪铁观音，兰花香浓郁，滋味醇厚，回甘明显',
+                batches: 720,
+                enterprises: 30,
+                color: '#556B2F'
+            },
+            {
+                id: 11,
+                name: '黄瓜',
+                category: 'vegetable',
+                categoryName: '蔬菜',
+                icon: '🥒',
+                desc: '有机黄瓜，清脆爽口，水分充足，适合生食或凉拌',
+                batches: 1560,
+                enterprises: 48,
+                color: '#228B22'
+            },
+            {
+                id: 12,
+                name: '草莓',
+                category: 'fruit',
+                categoryName: '水果',
+                icon: '🍓',
+                desc: '大棚草莓，果实鲜红，香气浓郁，甜度高，口感细腻',
+                batches: 980,
+                enterprises: 36,
+                color: '#DC143C'
+            }
+        ];
+
         let currentFilter = 'all';
 
         function renderProducts(filter = 'all') {
+            console.log('开始渲染产品，筛选条件:', filter);
+            console.log('产品总数:', products.length);
+            
             const grid = document.getElementById('productsGrid');
+            if (!grid) {
+                console.error('找不到 productsGrid 元素');
+                return;
+            }
+            
             const filteredProducts = filter === 'all' 
                 ? products 
                 : products.filter(p => p.category === filter);
+                
+            console.log('筛选后产品数:', filteredProducts.length);
 
-            grid.innerHTML = filteredProducts.map(product => `
+            const html = filteredProducts.map(product => `
                 <div class="product-card" onclick="viewProduct(${product.id})">
                     <div class="product-image" style="background: linear-gradient(135deg, ${product.color}dd 0%, ${product.color}88 100%);">
                         ${product.icon}
@@ -341,6 +512,10 @@
                     </div>
                 </div>
             `).join('');
+            
+            console.log('生成的 HTML 长度:', html.length);
+            grid.innerHTML = html;
+            console.log('产品渲染完成');
         }
 
         function filterProducts(category) {
@@ -361,8 +536,17 @@
             alert(`查看产品详情：${product.name}\n\n${product.desc}\n\n溯源批次：${product.batches}\n生产企业：${product.enterprises}`);
         }
 
-        // 初始化页面
-        renderProducts();
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            console.log('产品页面加载完成');
+            console.log('产品数据长度:', products.length);
+            
+            // 先用本地数据渲染
+            renderProducts();
+            
+            // 然后尝试加载 API 数据
+            loadProducts();
+        });
     </script>
 </body>
 

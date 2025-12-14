@@ -304,7 +304,7 @@
     </div>
 
     <script>
-        const certificates = [
+        let certificates = [
             {
                 id: 'CERT-ORG-2024-001',
                 type: 'organic',
@@ -570,8 +570,27 @@
             alert(`正在下载证书：${cert.title}\n证书编号：${cert.certNumber}`);
         }
 
+        // 从后端加载证书数据
+        async function loadCertificates() {
+            try {
+                const response = await fetch('/api/certificates');
+                const data = await response.json();
+                if (data.ok && data.certificates && data.certificates.length > 0) {
+                    certificates = data.certificates;
+                    console.log('Loaded certificates from API:', certificates.length);
+                } else {
+                    console.log('Using fallback certificate data');
+                }
+                renderCertificates();
+            } catch (error) {
+                console.error('Error loading certificates:', error);
+                console.log('Using fallback certificate data due to error');
+                renderCertificates();
+            }
+        }
+
         // 初始化页面
-        renderCertificates();
+        loadCertificates();
     </script>
 </body>
 

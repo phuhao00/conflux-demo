@@ -290,7 +290,7 @@
     </div>
 
     <script>
-        const traceRecords = [
+        let traceRecords = [
             {
                 id: 'TB20241210001',
                 product: '有机大米',
@@ -623,8 +623,27 @@
             }
         });
 
+        // 从后端加载溯源数据
+        async function loadTraceRecords() {
+            try {
+                const response = await fetch('/api/trace');
+                const data = await response.json();
+                if (data.ok && data.records && data.records.length > 0) {
+                    traceRecords = data.records;
+                    console.log('Loaded trace records from API:', traceRecords.length);
+                } else {
+                    console.log('Using fallback trace data');
+                }
+                renderTraceRecords();
+            } catch (error) {
+                console.error('Error loading trace records:', error);
+                console.log('Using fallback trace data due to error');
+                renderTraceRecords();
+            }
+        }
+
         // 初始化页面
-        renderTraceRecords();
+        loadTraceRecords();
     </script>
 </body>
 

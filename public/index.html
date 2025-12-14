@@ -760,6 +760,26 @@
     </div>
 
     <script>
+        // 加载统计数据
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/statistics');
+                const data = await response.json();
+                if (data.ok && data.stats) {
+                    const stats = data.stats;
+                    document.getElementById('blockNumber').textContent = stats.productTypes || 66;
+                    document.getElementById('latestBlock').textContent = (stats.traceBatches || 3030002).toLocaleString();
+                    document.getElementById('accountCount').textContent = (stats.enterprises || 331163).toLocaleString();
+                    console.log('Loaded statistics from API');
+                } else {
+                    console.log('Using fallback statistics');
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                console.log('Using fallback statistics due to error');
+            }
+        }
+
         // 初始化图表
         function initCharts() {
             console.log('开始初始化图表');
@@ -901,9 +921,14 @@
             }
         }
 
-        // 页面加载完成后初始化图表
+        // 页面加载完成后初始化
         window.addEventListener('load', function () {
-            console.log('页面加载完成，开始初始化图表');
+            console.log('页面加载完成，开始初始化');
+            
+            // 加载统计数据
+            loadStatistics();
+            
+            // 初始化图表
             console.log('Chart.js 是否加载:', typeof Chart !== 'undefined');
             if (typeof Chart !== 'undefined') {
                 initCharts();
