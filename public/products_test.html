@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品种类测试</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .debug { 
+            background: #f0f0f0; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            font-family: monospace;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .product-image {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+        .product-info {
+            padding: 20px;
+        }
+        .product-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .product-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e8f5e9;
+            color: #4caf50;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .product-desc {
+            color: #5a6c7d;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .product-stats {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid #e8ecf1;
+        }
+        .product-stat {
+            text-align: center;
+        }
+        .product-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #7c8ff5;
+        }
+        .product-stat-label {
+            font-size: 12px;
+            color: #8492a6;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>产品种类测试页面</h1>
+        
+        <div class="debug" id="debug">
+            调试信息将显示在这里...
+        </div>
+        
+        <button onclick="testRender()">测试渲染</button>
+        <button onclick="testAPI()">测试 API</button>
+        
+        <div class="products-grid" id="productsGrid">
+            <!-- 产品卡片将显示在这里 -->
+        </div>
+    </div>
+
+    <script>
+        const debugDiv = document.getElementById('debug');
+        
+        function log(message) {
+            console.log(message);
+            debugDiv.innerHTML += message + '<br>';
+        }
+        
+        const products = [
+            {
+                id: 1,
+                name: '有机大米',
+                category: 'grain',
+                categoryName: '粮食作物',
+                icon: '🌾',
+                desc: '来自黑龙江五常的优质有机大米，无农药无化肥，口感香甜软糯',
+                batches: 1250,
+                enterprises: 45,
+                color: '#FFD700'
+            },
+            {
+                id: 2,
+                name: '普洱茶',
+                category: 'tea',
+                categoryName: '茶叶',
+                icon: '🍵',
+                desc: '云南普洱古树茶，经过传统工艺发酵，茶香浓郁，回甘持久',
+                batches: 856,
+                enterprises: 32,
+                color: '#8B4513'
+            },
+            {
+                id: 3,
+                name: '新鲜蔬菜',
+                category: 'vegetable',
+                categoryName: '蔬菜',
+                icon: '🥬',
+                desc: '山东寿光大棚蔬菜，新鲜采摘，绿色健康，当日配送',
+                batches: 2340,
+                enterprises: 78,
+                color: '#32CD32'
+            }
+        ];
+        
+        function renderProducts() {
+            log(`开始渲染产品，产品数量: ${products.length}`);
+            
+            const grid = document.getElementById('productsGrid');
+            if (!grid) {
+                log('错误：找不到 productsGrid 元素');
+                return;
+            }
+            
+            log('找到 grid 元素，开始生成 HTML');
+            
+            const html = products.map(product => `
+                <div class="product-card" onclick="viewProduct(${product.id})">
+                    <div class="product-image" style="background: linear-gradient(135deg, ${product.color}dd 0%, ${product.color}88 100%);">
+                        ${product.icon}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <span class="product-category">${product.categoryName}</span>
+                        <div class="product-desc">${product.desc}</div>
+                        <div class="product-stats">
+                            <div class="product-stat">
+                                <div class="product-stat-value">${product.batches}</div>
+                                <div class="product-stat-label">溯源批次</div>
+                            </div>
+                            <div class="product-stat">
+                                <div class="product-stat-value">${product.enterprises}</div>
+                                <div class="product-stat-label">生产企业</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            log(`生成的 HTML 长度: ${html.length}`);
+            grid.innerHTML = html;
+            log('HTML 已插入到 grid 中');
+        }
+        
+        function testRender() {
+            log('=== 开始测试渲染 ===');
+            renderProducts();
+        }
+        
+        async function testAPI() {
+            log('=== 开始测试 API ===');
+            try {
+                const response = await fetch('/api/products');
+                log(`API 响应状态: ${response.status}`);
+                
+                const data = await response.json();
+                log(`API 响应数据: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.ok && data.products) {
+                    log(`从 API 获取到 ${data.products.length} 个产品`);
+                    // 使用 API 数据更新产品列表
+                    products.length = 0; // 清空现有数据
+                    products.push(...data.products);
+                    renderProducts();
+                } else {
+                    log('API 返回数据格式不正确');
+                }
+            } catch (error) {
+                log(`API 调用失败: ${error.message}`);
+            }
+        }
+        
+        function viewProduct(id) {
+            const product = products.find(p => p.id === id);
+            alert(`查看产品详情：${product.name}`);
+        }
+        
+        // 页面加载时自动渲染
+        window.addEventListener('load', function() {
+            log('页面加载完成');
+            testRender();
+        });
+    </script>
+</body>
+</html>
