@@ -13,4 +13,5 @@ if [ -n "$PIDS" ]; then
     done
 fi
 
-npm run dev
+nohup npm run dev > node_server.log 2>&1 &
+echo "Node server started in background. Check node_server.log for logs."

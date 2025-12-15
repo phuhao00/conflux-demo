@@ -14,4 +14,5 @@ if [ -n "$PIDS" ]; then
 fi
 
 cd mobile
-npm start
+nohup npm start > mobile.log 2>&1 &
+echo "Mobile app started in background. Check mobile/mobile.log for logs."
