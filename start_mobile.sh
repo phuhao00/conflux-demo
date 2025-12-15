@@ -14,5 +14,11 @@ if [ -n "$PIDS" ]; then
 fi
 
 cd mobile
+# Fix permission issues by clearing .expo cache
+if [ -d ".expo" ]; then
+    echo "Cleaning .expo cache..."
+    rm -rf .expo
+fi
+
 nohup npm start > mobile.log 2>&1 &
 echo "Mobile app started in background. Check mobile/mobile.log for logs."
