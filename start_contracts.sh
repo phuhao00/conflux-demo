@@ -13,4 +13,5 @@ if [ -n "$PIDS" ]; then
     done
 fi
 
-npx hardhat node
+nohup npx hardhat node > contracts.log 2>&1 &
+echo "Hardhat Node started in background. Check contracts.log for logs."
