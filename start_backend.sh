@@ -14,4 +14,5 @@ if [ -n "$PIDS" ]; then
 fi
 
 cd backend
-go run cmd/server/main.go
+nohup go run cmd/server/main.go > backend.log 2>&1 &
+echo "Backend started in background. Check backend/backend.log for logs."
