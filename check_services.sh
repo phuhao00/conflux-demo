@@ -21,7 +21,8 @@ check_port() {
 
 check_port 8545 "Contracts (Hardhat)"
 check_port 8080 "Backend (Go)"
-check_port 3000 "Frontend (Web)"
+check_port 3000 "Node Server (Relayer)"
+check_port 5173 "Web Frontend (Vite)"
 check_port 8081 "Mobile (Expo)"
 
 echo "=========================="

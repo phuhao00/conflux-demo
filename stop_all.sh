@@ -1,5 +1,5 @@
 #!/bin/bash
-PORTS="3000 8080 8545 8081"
+PORTS="3000 8080 8545 8081 5173"
 echo "Stopping services on ports: $PORTS..."
 
 for PORT in $PORTS; do
